@@ -1534,7 +1534,7 @@ def MAIN_PROCESS(
         return results
 
     def get_ort_device(bind_device_type, bind_device_id):
-        return onnxruntime.capi._pybind_state.OrtDevice(onnxruntime.capi.onnxruntime_inference_collection.get_ort_device_type(bind_device_type, bind_device_id), onnxruntime.capi._pybind_state.OrtDevice.default_memory(), bind_device_id)
+        return onnxruntime.capi._pybind_state.OrtDevice(onnxruntime.capi.onnxruntime_inference_collection.get_ort_device_type(bind_device_type), onnxruntime.capi._pybind_state.OrtDevice.default_memory(), bind_device_id)
 
     def bind_inputs_to_device(io_binding, input_names, ortvalue, num_inputs):
         for i in range(num_inputs):
