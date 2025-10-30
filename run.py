@@ -1697,10 +1697,15 @@ def MAIN_PROCESS(
             ORT_Accelerate_Providers = [
                 ('NvTensorRTRTXExecutionProvider', {
                     'device_id': DEVICE_ID,
-                    'nv_max_workspace_size': 0,      # 0 for Auto
+                    'user_compute_stream': ""
+                    'nv_runtime_cache_path': "./TensorRT_Cache",
+                    'nv_max_workspace_size': 0,       # 0 for Auto
+                    'nv_max_shared_mem_size': 0,      # 0 for Auto
                     'nv_dump_subgraphs': False,
                     'nv_cuda_graph_enable': False,
                     'nv_detailed_build_log': False,
+                    'nv_multi_profile_enable': False,
+                    'nv_use_external_data_initializer': False,
                     'nv_profile_min_shapes': 'input_tensor_1:1x1x4800',
                     'nv_profile_max_shapes': 'input_tensor_1:1x1x960000',
                     'nv_profile_opt_shapes': 'input_tensor_1:1x1x480000'
