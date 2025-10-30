@@ -35,26 +35,26 @@ pip install -r requirements.txt
 # 请根据您的硬件平台安装正确的包 / Please according to your hardware platform install the right package
 # ----------------------------------------
 # For CPU only
-# onnxruntime>=1.23.0
+# onnxruntime>=1.23.2
 # ----------------------------------------
 # For Linux + AMD
 # 请先按照 URL 设置 ROCm / Please follow the URL to set up the ROCm first before pip install onnxruntime-rocm
 # https://rocm.docs.amd.com/projects/radeon/en/latest/docs/install/native_linux/install-onnx.html
 # https://onnxruntime.ai/docs/execution-providers/Vitis-AI-ExecutionProvider.html
-# onnxruntime>=1.23.0
-# onnxruntime-rocm>=1.22.0
+# onnxruntime>=1.23.2
+# onnxruntime-rocm>=1.23.0
 # ----------------------------------------
 # For Windows + (Intel or AMD)
-# onnxruntime>=1.23.0
+# onnxruntime>=1.23.2
 # onnxruntime-directml>=1.23.0
 # ----------------------------------------
 # For Intel OpenVINO CPU & GPU & NPU
-# onnxruntime>=1.23.0
-# onnxruntime-openvino>=1.22.0
+# onnxruntime>=1.23.2
+# onnxruntime-openvino>=1.23.0
 # ----------------------------------------
 # For NVIDIA-CUDA
-# onnxruntime>=1.23.0
-# onnxruntime-gpu>=1.23.0
+# onnxruntime>=1.23.2
+# onnxruntime-gpu>=1.23.2
 # ----------------------------------------
 ```
 
