@@ -1604,7 +1604,7 @@ def MAIN_PROCESS(
             has_npu = (('OpenVINOExecutionProvider' in usable_providers) and has_npu) or ('VitisAIExecutionProvider' in usable_providers) or ('QNNExecutionProvider' in usable_providers)
             cuda_options = {
                 'device_id': DEVICE_ID,
-                'gpu_mem_limit': 64 * 1024 * 1024 * 1024,    # 64 GB
+                'gpu_mem_limit': 64 * 1073741824,    # 64 GB
                 'arena_extend_strategy': 'kNextPowerOfTwo',  # ["kNextPowerOfTwo", "kSameAsRequested"]
                 'cudnn_conv_algo_search': 'EXHAUSTIVE',      # ["DEFAULT", "HEURISTIC", "EXHAUSTIVE"]
                 'sdpa_kernel': '2',                          # ["0", "1", "2"]
@@ -1632,11 +1632,11 @@ def MAIN_PROCESS(
                 ORT_Accelerate_Providers = ['NvTensorRTRTXExecutionProvider']
                 if 'CUDAExecutionProvider' in usable_providers:
                     ORT_Accelerate_Providers = ['NvTensorRTRTXExecutionProvider', 'CUDAExecutionProvider']
-            # elif 'TensorrtExecutionProvider' in usable_providers:
-            #     device_type = 'cuda'
-            #     ORT_Accelerate_Providers = ['TensorrtExecutionProvider']
-            #     if 'CUDAExecutionProvider' in usable_providers:
-            #         ORT_Accelerate_Providers = ['TensorrtExecutionProvider', 'CUDAExecutionProvider']
+            elif 'TensorrtExecutionProvider' in usable_providers:
+                device_type = 'cuda'
+                ORT_Accelerate_Providers = ['TensorrtExecutionProvider']
+                if 'CUDAExecutionProvider' in usable_providers:
+                    ORT_Accelerate_Providers = ['TensorrtExecutionProvider', 'CUDAExecutionProvider']
             elif 'CUDAExecutionProvider' in usable_providers:
                 device_type = 'cuda'
                 ORT_Accelerate_Providers = ['CUDAExecutionProvider']
@@ -1725,19 +1725,21 @@ def MAIN_PROCESS(
         trt_options = {
                     'device_id': DEVICE_ID,
                     'trt_detailed_build_log': False,
-                    'trt_timing_cache_enable': False,
+                    'trt_timing_cache_enable': True,
                     'trt_force_timing_cache': True,
-                    'trt_timing_cache_path': "./Cache",
+                    'trt_timing_cache_path': "./TensorRT_Cache",
                     'trt_layer_norm_fp32_fallback': False,
                     'trt_context_memory_sharing_enable': True,
-                    'trt_dump_subgraphs': True,
+                    'trt_dump_subgraphs': False,
                     'trt_force_sequential_engine_build': False,  # For multi-GPU
                     'trt_dla_enable': True,
                     'trt_build_heuristics_enable': True,
                     'trt_sparsity_enable': True,
                     'trt_engine_hw_compatible': True,
                     'trt_engine_cache_enable': True,
-                    'trt_engine_cache_path': "./Cache",
+                    'trt_engine_cache_path': "./TensorRT_Cache",
+                    'trt_dump_ep_context_model': True,
+                    'trt_ep_context_file_path': "./TensorRT_Cache",
                     'trt_cuda_graph_enable': False,
                     'trt_fp16_enable': True,
                     'trt_int8_enable': False,
@@ -1745,7 +1747,7 @@ def MAIN_PROCESS(
                     'trt_min_subgraph_size': 1,
                     'trt_max_workspace_size': 64 * 1073741824,  # 64GB
                     'trt_builder_optimization_level': 5,
-                    'trt_auxiliary_streams': 0,
+                    'trt_auxiliary_streams': -1,
                     'trt_profile_min_shapes': 'input_tensor_1:1x1x4800',
                     'trt_profile_max_shapes': 'input_tensor_1:1x1x960000',
                     'trt_profile_opt_shapes': 'input_tensor_1:1x1x480000'
@@ -1766,11 +1768,11 @@ def MAIN_PROCESS(
                 'migraphx_fp16_enable': 1,
                 'migraphx_int8_enable': 0,
                 'migraphx_save_compiled_model': 1,
-                'migraphx_save_compiled_path': './Cache',
+                'migraphx_save_compiled_path': './MIGraph_Cache',
                 'migraphx_load_compiled_model': 0,
-                'migraphx_load_compiled_path': './Cache',
+                'migraphx_load_compiled_path': './MIGraph_Cache',
                 'migraphx_exhaustive_tune': 1,
-                'migraphx_mem_limit': 64 * 1024 * 1024 * 1024  # 64 GB
+                'migraphx_mem_limit': 64 * 1073741824  # 64 GB
             }
         if len(ORT_Accelerate_Providers) > 1:
             ORT_Accelerate_Providers = [
@@ -1827,7 +1829,7 @@ def MAIN_PROCESS(
                 'enable_htp_fp16_precision': '1',
                 'ep.context_enable': '1',
                 'ep.context_embed_mode': '1',
-                'ep.context_file_path': './Cache/qnn_ctx.onnx'
+                'ep.context_file_path': './QNN_Cache/qnn_ctx.onnx'
             }
         ]
     else:
