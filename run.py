@@ -1674,11 +1674,11 @@ def MAIN_PROCESS(
                 ORT_Accelerate_Providers = ['NvTensorRTRTXExecutionProvider']
                 if 'CUDAExecutionProvider' in usable_providers:
                     ORT_Accelerate_Providers = ['NvTensorRTRTXExecutionProvider', 'CUDAExecutionProvider']
-            elif 'TensorrtExecutionProvider' in usable_providers:
-                device_type = 'cuda'
-                ORT_Accelerate_Providers = ['TensorrtExecutionProvider']
-                if 'CUDAExecutionProvider' in usable_providers:
-                    ORT_Accelerate_Providers = ['TensorrtExecutionProvider', 'CUDAExecutionProvider']
+            # elif 'TensorrtExecutionProvider' in usable_providers:
+            #     device_type = 'cuda'
+            #     ORT_Accelerate_Providers = ['TensorrtExecutionProvider']
+            #     if 'CUDAExecutionProvider' in usable_providers:
+            #         ORT_Accelerate_Providers = ['TensorrtExecutionProvider', 'CUDAExecutionProvider']
             elif 'CUDAExecutionProvider' in usable_providers:
                 device_type = 'cuda'
                 ORT_Accelerate_Providers = ['CUDAExecutionProvider']
