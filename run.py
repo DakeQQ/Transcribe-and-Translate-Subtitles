@@ -898,8 +898,7 @@ def update_transcribe_language(dropdown_model_asr):
     elif "fireredasr-aed-l" in lower_dropdown_model_asr:
         update_A = gr.update(visible=True, value=WHISPER_LANGUAGE_LIST[0], choices=[WHISPER_LANGUAGE_LIST[0]])
     elif "paraformer-large" in lower_dropdown_model_asr:
-        update_A = gr.update(visible=True, value=WHISPER_LANGUAGE_LIST[0],
-                             choices=[WHISPER_LANGUAGE_LIST[0], WHISPER_LANGUAGE_LIST[1]])
+        update_A = gr.update(visible=True, value=WHISPER_LANGUAGE_LIST[0], choices=[WHISPER_LANGUAGE_LIST[0], WHISPER_LANGUAGE_LIST[1]])
     elif "dolphin-small" in lower_dropdown_model_asr:
         update_A = gr.update(value=DOLPHIN_LANGUAGE_LIST[0], choices=DOLPHIN_LANGUAGE_LIST)
     else:
@@ -1171,12 +1170,7 @@ def MAIN_PROCESS(
             """Helper function to create ONNX session with given device type"""
             try:
                 _provider_options[0]['device_type'] = device_type
-                session = onnxruntime.InferenceSession(
-                    _onnx_model_x,
-                    sess_options=_session_opts,
-                    providers=_ORT_Accelerate_Providers,
-                    provider_options=_provider_options
-                )
+                session = onnxruntime.InferenceSession(_onnx_model_x, sess_options=_session_opts, providers=_ORT_Accelerate_Providers, provider_options=_provider_options)
                 if len(session.get_providers()) > 1:
                     print(f"\n{tag}: OpenVINO-{device_name}使用成功。OpenVINO-{device_name} is used successfully.")
                     return session, True
@@ -1203,9 +1197,7 @@ def MAIN_PROCESS(
                             device_type_x = _device_type
                 else:
                     # Non-OpenVINO provider
-                    ort_session_x = onnxruntime.InferenceSession(_onnx_model_x, sess_options=_session_opts,
-                                                                 providers=_ORT_Accelerate_Providers,
-                                                                 provider_options=_provider_options)
+                    ort_session_x = onnxruntime.InferenceSession(_onnx_model_x, sess_options=_session_opts, providers=_ORT_Accelerate_Providers, provider_options=_provider_options)
                     if len(ort_session_x.get_providers()) > 1:
                         device_type_x = _device_type
                         print(f"\n{tag}: GPU_NPU 使用成功。GPU_NPU is used successfully.")
@@ -1222,21 +1214,17 @@ def MAIN_PROCESS(
             _provider_options = None
             use_sync_operations = False
             _onnx_model_x = _onnx_model_x.replace('FP16', 'FP32')
-            ort_session_x = onnxruntime.InferenceSession(_onnx_model_x, sess_options=_session_opts,
-                                                         providers=_ORT_Accelerate_Providers,
-                                                         provider_options=_provider_options)
+            ort_session_x = onnxruntime.InferenceSession(_onnx_model_x, sess_options=_session_opts, providers=_ORT_Accelerate_Providers, provider_options=_provider_options)
 
         # Temporary fallback to 'cpu'.
         if (device_type_x in ['gpu', 'npu'] and onnxruntime.version != '1.23.0') or device_type_x in ['dml']:
             device_type_x = 'cpu'
-
+            
         return ort_session_x, use_sync_operations, device_type_x, _ORT_Accelerate_Providers, _provider_options
 
     def inference_A(_inv_audio_len, _slice_start, _slice_end, _audio):
-        wave_form = onnxruntime.OrtValue.ortvalue_from_numpy(_audio[..., _slice_start: _slice_end], device_type_A,
-                                                             DEVICE_ID)
-        return _slice_start * _inv_audio_len, ort_session_A._sess.run_with_ort_values({in_name_A0: wave_form._ortvalue},
-                                                                                      out_name_A0, run_options)
+        wave_form = onnxruntime.OrtValue.ortvalue_from_numpy(_audio[..., _slice_start: _slice_end], device_type_A, DEVICE_ID)
+        return _slice_start * _inv_audio_len, ort_session_A._sess.run_with_ort_values({in_name_A0: wave_form._ortvalue}, out_name_A0, run_options)
 
     def inference_C_sensevoice(_max_asr_segment, _start, _end, _inv_audio_len, _audio, _sample_rate, _language_idx):
         _start_indices = _start * _sample_rate
@@ -1248,11 +1236,8 @@ def MAIN_PROCESS(
         _slice_end = INPUT_AUDIO_LENGTH
         saved_text = ''
         while _slice_start < audio_segment_len:
-            wave_form = onnxruntime.OrtValue.ortvalue_from_numpy(
-                np.concatenate([pad_zeros, _audio[..., _slice_start: _slice_end], pad_zeros], axis=-1), device_type_C,
-                DEVICE_ID)
-            token_ids = ort_session_C._sess.run_with_ort_values(
-                {in_name_C0: wave_form._ortvalue, in_name_C1: _language_idx}, out_name_C, run_options)
+            wave_form = onnxruntime.OrtValue.ortvalue_from_numpy(np.concatenate([pad_zeros, _audio[..., _slice_start: _slice_end], pad_zeros], axis=-1), device_type_C, DEVICE_ID)
+            token_ids = ort_session_C._sess.run_with_ort_values({in_name_C0: wave_form._ortvalue, in_name_C1: _language_idx}, out_name_C, run_options)
             saved_text += tokenizer.decode(token_ids[0].numpy().tolist())[0]
             _slice_start += _stride_step
             _slice_end = _slice_start + INPUT_AUDIO_LENGTH
@@ -1268,11 +1253,8 @@ def MAIN_PROCESS(
         _slice_end = INPUT_AUDIO_LENGTH
         saved_text = ''
         while _slice_start < audio_segment_len:
-            wave_form = onnxruntime.OrtValue.ortvalue_from_numpy(
-                np.concatenate([pad_zeros, _audio[..., _slice_start: _slice_end], pad_zeros], axis=-1), device_type_C,
-                DEVICE_ID)
-            token_ids = ort_session_C._sess.run_with_ort_values({in_name_C0: wave_form._ortvalue}, out_name_C,
-                                                                run_options)
+            wave_form = onnxruntime.OrtValue.ortvalue_from_numpy(np.concatenate([pad_zeros, _audio[..., _slice_start: _slice_end], pad_zeros], axis=-1), device_type_C, DEVICE_ID)
+            token_ids = ort_session_C._sess.run_with_ort_values({in_name_C0: wave_form._ortvalue}, out_name_C, run_options)
             saved_text += tokenizer[token_ids[0].numpy()[0]]
             _slice_start += _stride_step
             _slice_end = _slice_start + INPUT_AUDIO_LENGTH
@@ -1319,11 +1301,8 @@ def MAIN_PROCESS(
                 else:
                     penality_reset_count_greedy = _init_penality_reset_count_beam
             num_decode = 0
-            wave_form = onnxruntime.OrtValue.ortvalue_from_numpy(
-                np.concatenate([pad_zeros, _audio[..., _slice_start: _slice_end], pad_zeros], axis=-1), device_type_C,
-                DEVICE_ID)
-            all_outputs_C = ort_session_C._sess.run_with_ort_values({in_name_C0: wave_form._ortvalue}, out_name_C,
-                                                                    run_options)
+            wave_form = onnxruntime.OrtValue.ortvalue_from_numpy(np.concatenate([pad_zeros, _audio[..., _slice_start: _slice_end], pad_zeros], axis=-1), device_type_C, DEVICE_ID)
+            all_outputs_C = ort_session_C._sess.run_with_ort_values({in_name_C0: wave_form._ortvalue}, out_name_C,run_options)
             input_feed_D.update(zip(in_name_D[num_keys_values_plus_2: num_keys_values2_plus_2], all_outputs_C))
             while num_decode < generate_limit:
                 all_outputs_D = ort_session_D._sess.run_with_ort_values(input_feed_D, out_name_D, run_options)
@@ -1365,8 +1344,7 @@ def MAIN_PROCESS(
                     if max_logits_idx in ASR_STOP_TOKEN:
                         break
                     input_feed_D[in_name_D[num_keys_values]] = all_outputs_G[0]
-                    if DO_REPEAT_PENALITY and (num_decode >= PENALITY_RANGE) and (
-                            _init_save_id_greedy[penality_reset_count_greedy] != max_logits_idx):
+                    if DO_REPEAT_PENALITY and (num_decode >= PENALITY_RANGE) and (_init_save_id_greedy[penality_reset_count_greedy] != max_logits_idx):
                         repeat_penality = all_outputs_G[1].numpy()
                         repeat_penality[..., penality_reset_count_greedy] = 1.0
                         input_feed_G[in_name_G[1]].update_inplace(repeat_penality)
@@ -1390,11 +1368,9 @@ def MAIN_PROCESS(
                         if idx in ASR_STOP_TOKEN:
                             save_token_array = save_token_array[:i]
                             break
-                    save_token_array = remove_repeated_parts(save_token_array, REMOVE_OVER_TALKING,
-                                                             save_token_array.shape[-1])
+                    save_token_array = remove_repeated_parts(save_token_array, REMOVE_OVER_TALKING, save_token_array.shape[-1])
                 else:
-                    save_token_array = remove_repeated_parts(_init_save_id_greedy[:num_decode], REMOVE_OVER_TALKING,
-                                                             num_decode)  # To handle "over-talking".
+                    save_token_array = remove_repeated_parts(_init_save_id_greedy[:num_decode], REMOVE_OVER_TALKING, num_decode)  # To handle "over-talking".
                 if _is_whisper:
                     text, _ = tokenizer._decode_asr(
                         [{
@@ -1405,8 +1381,7 @@ def MAIN_PROCESS(
                         time_precision=0
                     )
                 else:
-                    text = (''.join([tokenizer.dict[int(id)] for id in save_token_array])).replace(tokenizer.SPM_SPACE,
-                                                                                                   ' ').strip()
+                    text = (''.join([tokenizer.dict[int(id)] for id in save_token_array])).replace(tokenizer.SPM_SPACE, ' ').strip()
                 saved_text += text
         return _start_indices * _inv_audio_len, saved_text + ';', (_start, _end)
 
@@ -1426,11 +1401,8 @@ def MAIN_PROCESS(
         _slice_end = INPUT_AUDIO_LENGTH
         saved_text = ''
         while _slice_start < audio_segment_len:
-            wave_form = onnxruntime.OrtValue.ortvalue_from_numpy(
-                np.concatenate([pad_zeros, _audio[..., _slice_start: _slice_end], pad_zeros], axis=-1), device_type_C,
-                DEVICE_ID)
-            all_outputs_C = ort_session_C._sess.run_with_ort_values({in_name_C0: wave_form._ortvalue}, out_name_C,
-                                                                    run_options)
+            wave_form = onnxruntime.OrtValue.ortvalue_from_numpy(np.concatenate([pad_zeros, _audio[..., _slice_start: _slice_end], pad_zeros], axis=-1), device_type_C, DEVICE_ID)
+            all_outputs_C = ort_session_C._sess.run_with_ort_values({in_name_C0: wave_form._ortvalue}, out_name_C, run_options)
             input_feed_D = {
                 in_name_D[-1]: _init_attention_mask_D_1,
                 in_name_D[num_keys_values_plus_1]: _init_history_len,
@@ -1447,9 +1419,7 @@ def MAIN_PROCESS(
                 input_feed_D[in_name_D[-2]] = _init_ids_len_2
                 input_feed_D[in_name_D[num_keys_values]] = _init_ids_39999
                 all_outputs_D = ort_session_D._sess.run_with_ort_values(input_feed_D, out_name_D, run_options)
-                _lang_id = \
-                ort_session_K._sess.run_with_ort_values({in_name_K: all_outputs_D[num_keys_values]}, out_name_K,
-                                                        run_options)[0].numpy()[0] + 7
+                _lang_id = ort_session_K._sess.run_with_ort_values({in_name_K: all_outputs_D[num_keys_values]}, out_name_K, run_options)[0].numpy()[0] + 7
                 for i in range(num_layers):
                     input_feed_D[in_name_D[i]] = _init_past_keys_D
                 for i in range(num_layers, num_keys_values):
@@ -1458,13 +1428,10 @@ def MAIN_PROCESS(
                 input_feed_D[in_name_D[-4]] = _init_ids_145
                 input_feed_D[in_name_D[-3]] = _init_ids_324
                 input_feed_D[in_name_D[-2]] = _init_ids_len_2
-                in_ids = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([[39999, _lang_id]], dtype=np.int32),
-                                                                  device_type_C, DEVICE_ID)
+                in_ids = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([[39999, _lang_id]], dtype=np.int32), device_type_C, DEVICE_ID)
                 input_feed_D[in_name_D[num_keys_values]] = in_ids._ortvalue
                 all_outputs_D = ort_session_D._sess.run_with_ort_values(input_feed_D, out_name_D, run_options)
-                _region_id = \
-                ort_session_K._sess.run_with_ort_values({in_name_K: all_outputs_D[num_keys_values]}, out_name_K,
-                                                        run_options)[0].numpy()[0] + 145
+                _region_id = ort_session_K._sess.run_with_ort_values({in_name_K: all_outputs_D[num_keys_values]}, out_name_K, run_options)[0].numpy()[0] + 145
                 for i in range(num_layers):
                     input_feed_D[in_name_D[i]] = _init_past_keys_D
                 for i in range(num_layers, num_keys_values):
@@ -1472,15 +1439,12 @@ def MAIN_PROCESS(
             if detect_language or detect_region:
                 lang_str = tokenizer.decode(_lang_id)
                 region_str = tokenizer.decode(_region_id)
-                transcribe_language = INV_DOLPHIN_LANGUAGE_MAP.get(f'{lang_str}-{region_str}',
-                                                                   'Unknown')  # Update the global variable: transcribe_language
+                transcribe_language = INV_DOLPHIN_LANGUAGE_MAP.get(f'{lang_str}-{region_str}', 'Unknown')  # Update the global variable: transcribe_language
             input_feed_D[in_name_D[-4]] = _init_ids_0
             input_feed_D[in_name_D[-3]] = _init_ids_vocab_size
             input_feed_D[in_name_D[-2]] = _init_ids_len_5
-            in_ids = onnxruntime.OrtValue.ortvalue_from_numpy(
-                np.array([[39999, _lang_id, _region_id, 6, 324]], dtype=np.int32), device_type_C, DEVICE_ID)
-            input_feed_D[
-                in_name_D[num_keys_values]] = in_ids._ortvalue  # start_id = 39999; itn = 5; asr = 6; no_timestamp = 324
+            in_ids = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([[39999, _lang_id, _region_id, 6, 324]], dtype=np.int32), device_type_C, DEVICE_ID)
+            input_feed_D[in_name_D[num_keys_values]] = in_ids._ortvalue  # start_id = 39999; itn = 5; asr = 6; no_timestamp = 324
             if USE_BEAM_SEARCH:
                 input_feed_H[in_name_H[num_keys_values_plus_1]] = _init_save_id_beam
                 input_feed_H[in_name_H[num_keys_values_plus_2]] = _init_repeat_penality
@@ -1573,9 +1537,7 @@ def MAIN_PROCESS(
         return results
 
     def get_ort_device(bind_device_type, bind_device_id):
-        return onnxruntime.capi._pybind_state.OrtDevice(
-            onnxruntime.capi.onnxruntime_inference_collection.get_ort_device_type(bind_device_type),
-            onnxruntime.capi._pybind_state.OrtDevice.default_memory(), bind_device_id)
+        return onnxruntime.capi._pybind_state.OrtDevice(onnxruntime.capi.onnxruntime_inference_collection.get_ort_device_type(bind_device_type), onnxruntime.capi._pybind_state.OrtDevice.default_memory(), bind_device_id)
 
     def bind_inputs_to_device(io_binding, input_names, ortvalue, num_inputs):
         for i in range(num_inputs):
@@ -1936,8 +1898,7 @@ def MAIN_PROCESS(
         else:
             error = "\nVAD-Pyannote_Segmentation 不存在。请运行'pip install pyannote.audio --upgrade' 并从 https://huggingface.co/pyannote/segmentation-3.0 下载 pytorch_model.bin。\nThe VAD-Pyannote_Segmentation doesn't exist. Please run 'pip install pyannote.audio' --upgrade and Download the pytorch_model.bin from https://huggingface.co/pyannote/segmentation-3.0"
             print(error)
-            print(
-                "\nVAD-Pyannote_Segmentation 不存在。回退到 Faster_Whisper-Silero。\nThe VAD-Pyannote_Segmentation doesn't exist. Fallback to Faster_Whisper-Silero.")
+            print("\nVAD-Pyannote_Segmentation 不存在。回退到 Faster_Whisper-Silero。\nThe VAD-Pyannote_Segmentation doesn't exist. Fallback to Faster_Whisper-Silero.")
             if os.path.isdir(PYTHON_PACKAGE + r'/faster_whisper'):
                 vad_type = 1
                 onnx_model_B = None
@@ -1959,8 +1920,7 @@ def MAIN_PROCESS(
         onnx_model_B = f'./VAD/NVIDIA_Frame_VAD_Multilingual_MarbleNet/FP32/NVIDIA_MarbleNet.onnx'
         if os.path.isfile(onnx_model_B):
             vad_type = 5
-            print(
-                f'\n找到了 VAD-NVIDIA_Frame_VAD_Multilingual_MarbleNet。Found the VAD-NVIDIA_Frame_VAD_Multilingual_MarbleNet.')
+            print(f'\n找到了 VAD-NVIDIA_Frame_VAD_Multilingual_MarbleNet。Found the VAD-NVIDIA_Frame_VAD_Multilingual_MarbleNet.')
         else:
             error = "\nVAD-NVIDIA_Frame_VAD_Multilingual_MarbleNet 不存在。\nThe VAD-NVIDIA_Frame_VAD_Multilingual_MarbleNet doesn't exist. "
             print(error)
@@ -2033,8 +1993,7 @@ def MAIN_PROCESS(
         if ('Whisper' in model_llm) and ('Translate' in task):
             whisper_start_token, ASR_STOP_TOKEN, target_task_id = get_task_id_whisper('Translate', USE_V3, custom_vocab)
         else:
-            whisper_start_token, ASR_STOP_TOKEN, target_task_id = get_task_id_whisper('Transcribe', USE_V3,
-                                                                                      custom_vocab)
+            whisper_start_token, ASR_STOP_TOKEN, target_task_id = get_task_id_whisper('Transcribe', USE_V3, custom_vocab)
     elif 'SenseVoice' in model_asr:
         from sentencepiece import SentencePieceProcessor
         onnx_model_C = r'./ASR/SenseVoice/Small/FP32/SenseVoice.onnx'
@@ -2093,8 +2052,7 @@ def MAIN_PROCESS(
             print(error)
             return error
         asr_type = 3
-        tokenizer = ChineseCharEnglishSpmTokenizer(r'./ASR/FireRedASR/AED/L/Tokenizer/dict.txt',
-                                                   r'./ASR/FireRedASR/AED/L/Tokenizer/train_bpe1000.model')
+        tokenizer = ChineseCharEnglishSpmTokenizer(r'./ASR/FireRedASR/AED/L/Tokenizer/dict.txt', r'./ASR/FireRedASR/AED/L/Tokenizer/train_bpe1000.model')
     elif 'Dolphin' in model_asr:
         path = f'./ASR/Dolphin/Small/{model_dtype}/'
         onnx_model_C = path + 'Dolphin_Encoder.onnx'
@@ -2129,10 +2087,10 @@ def MAIN_PROCESS(
     # ONNX Runtime settings
     session_opts = onnxruntime.SessionOptions()
     run_options = onnxruntime.RunOptions()
-    session_opts.log_severity_level = 4  # Fatal level, it an adjustable value.
+    session_opts.log_severity_level = 4   # Fatal level, it an adjustable value.
     session_opts.log_verbosity_level = 4  # Fatal level, it an adjustable value.
-    run_options.log_severity_level = 4  # Fatal level, it an adjustable value.
-    run_options.log_verbosity_level = 4  # Fatal level, it an adjustable value.
+    run_options.log_severity_level = 4    # Fatal level, it an adjustable value.
+    run_options.log_verbosity_level = 4   # Fatal level, it an adjustable value.
     session_opts.inter_op_num_threads = parallel_threads  # Run different nodes with num_threads. Set 0 for auto.
     session_opts.intra_op_num_threads = parallel_threads  # Under the node, execute the operators with num_threads. Set 0 for auto.
     session_opts.enable_cpu_mem_arena = True  # True for execute speed; False for less memory usage.
@@ -2194,8 +2152,7 @@ def MAIN_PROCESS(
         print("\nVAD 可用的硬件 VAD Usable Providers: ['CPUExecutionProvider']")
     elif vad_type == 5:
         # Using CPU is fast enough.
-        ort_session_B = onnxruntime.InferenceSession(onnx_model_B, sess_options=session_opts,
-                                                     providers=['CPUExecutionProvider'], provider_options=None)
+        ort_session_B = onnxruntime.InferenceSession(onnx_model_B, sess_options=session_opts, providers=['CPUExecutionProvider'], provider_options=None)
         device_type_B = 'cpu'
         print("\nVAD 可用的硬件 VAD Usable Providers: ['CPUExecutionProvider']")
         in_name_B = ort_session_B.get_inputs()
@@ -2211,13 +2168,7 @@ def MAIN_PROCESS(
         print("\nVAD 可用的硬件 VAD Usable Providers: ['CPUExecutionProvider']")
 
     # Load ASR model
-    ort_session_C, _, device_type_C, ORT_Accelerate_Providers_C, provider_options_C = create_ort_session(device_type,
-                                                                                                         has_npu,
-                                                                                                         onnx_model_C,
-                                                                                                         ORT_Accelerate_Providers,
-                                                                                                         session_opts,
-                                                                                                         provider_options,
-                                                                                                         'ASR')
+    ort_session_C, _, device_type_C, ORT_Accelerate_Providers_C, provider_options_C = create_ort_session(device_type, has_npu, onnx_model_C, ORT_Accelerate_Providers, session_opts, provider_options, 'ASR')
     provider_c = ort_session_C.get_providers()
     print(f'\nASR 可用的硬件 ASR-Usable Providers: {provider_c}')
     if (asr_type == 0) or (asr_type == 3) or (asr_type == 4):  # Whisper & FireRedASR & Dolphin
@@ -2265,25 +2216,17 @@ def MAIN_PROCESS(
             if len(provider_c) < 2:
                 onnx_model_K = onnx_model_K.replace('FP16', 'FP32')
             generate_limit = MAX_SEQ_LEN_ASR - 6  # 6 = length of initial input_ids
-            ort_session_K = onnxruntime.InferenceSession(onnx_model_K, sess_options=session_opts,
-                                                         providers=ORT_Accelerate_Providers_C,
-                                                         provider_options=provider_options_C)
+            ort_session_K = onnxruntime.InferenceSession(onnx_model_K, sess_options=session_opts, providers=ORT_Accelerate_Providers_C, provider_options=provider_options_C)
             in_name_K = ort_session_K.get_inputs()[0].name
             out_name_K = [ort_session_K.get_outputs()[0].name]
-            ids_len_2 = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([2], dtype=np.int64), device_type_C,
-                                                                 DEVICE_ID)
-            ids_len_5 = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([5], dtype=np.int64), device_type_C,
-                                                                 DEVICE_ID)
+            ids_len_2 = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([2], dtype=np.int64), device_type_C, DEVICE_ID)
+            ids_len_5 = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([5], dtype=np.int64), device_type_C, DEVICE_ID)
             ids_0 = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([0], dtype=np.int64), device_type_C, DEVICE_ID)
             ids_7 = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([7], dtype=np.int64), device_type_C, DEVICE_ID)
-            ids_145 = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([145], dtype=np.int64), device_type_C,
-                                                               DEVICE_ID)
-            ids_324 = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([324], dtype=np.int64), device_type_C,
-                                                               DEVICE_ID)
-            ids_39999 = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([[39999]], dtype=np.int32), device_type_C,
-                                                                 DEVICE_ID)  # int32
-            ids_vocab_size = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([vocab_size], dtype=np.int64),
-                                                                      device_type_C, DEVICE_ID)
+            ids_145 = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([145], dtype=np.int64), device_type_C, DEVICE_ID)
+            ids_324 = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([324], dtype=np.int64), device_type_C, DEVICE_ID)
+            ids_39999 = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([[39999]], dtype=np.int32), device_type_C, DEVICE_ID)  # int32
+            ids_vocab_size = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([vocab_size], dtype=np.int64), device_type_C, DEVICE_ID)
 
             init_ids_len_2 = ids_len_2._ortvalue
             init_ids_len_5 = ids_len_5._ortvalue
@@ -2294,9 +2237,7 @@ def MAIN_PROCESS(
             init_ids_39999 = ids_39999._ortvalue
             init_ids_vocab_size = ids_vocab_size._ortvalue
 
-        ort_session_D = onnxruntime.InferenceSession(onnx_model_D, sess_options=session_opts,
-                                                     providers=ORT_Accelerate_Providers_C,
-                                                     provider_options=provider_options_C)
+        ort_session_D = onnxruntime.InferenceSession(onnx_model_D, sess_options=session_opts, providers=ORT_Accelerate_Providers_C, provider_options=provider_options_C)
         in_name_C = ort_session_C.get_inputs()
         out_name_C = ort_session_C.get_outputs()
         in_name_C0 = in_name_C[0].name
@@ -2320,60 +2261,39 @@ def MAIN_PROCESS(
         layer_indices = np.arange(num_keys_values_plus_2, num_keys_values_plus_2 + num_keys_values, dtype=np.int32)
         if asr_type != 4:
             vocab_size = ort_session_D._outputs_meta[num_keys_values].shape[1]
-        attention_mask_D_0 = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([0], dtype=np.int8), device_type_C,
-                                                                      DEVICE_ID)
-        attention_mask_D_1 = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([1], dtype=np.int8), device_type_C,
-                                                                      DEVICE_ID)
+        attention_mask_D_0 = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([0], dtype=np.int8), device_type_C, DEVICE_ID)
+        attention_mask_D_1 = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([1], dtype=np.int8), device_type_C, DEVICE_ID)
         history_len = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([0], dtype=np.int64), device_type_C, DEVICE_ID)
-        ids_len = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([input_ids.shape[-1]], dtype=np.int64),
-                                                           device_type_C, DEVICE_ID)
+        ids_len = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([input_ids.shape[-1]], dtype=np.int64), device_type_C, DEVICE_ID)
         ids_len_1 = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([1], dtype=np.int64), device_type_C, DEVICE_ID)
         input_ids = onnxruntime.OrtValue.ortvalue_from_numpy(input_ids, device_type_C, DEVICE_ID)
-        repeat_penality = onnxruntime.OrtValue.ortvalue_from_numpy(
-            np.ones((slide_beam_size_asr, vocab_size), dtype=model_D_dtype), device_type_C, DEVICE_ID)
-        penality_value = onnxruntime.OrtValue.ortvalue_from_numpy(
-            np.array(slide_repeat_penality_value_asr, dtype=model_D_dtype), device_type_C, DEVICE_ID)
+        repeat_penality = onnxruntime.OrtValue.ortvalue_from_numpy(np.ones((slide_beam_size_asr, vocab_size), dtype=model_D_dtype), device_type_C, DEVICE_ID)
+        penality_value = onnxruntime.OrtValue.ortvalue_from_numpy(np.array(slide_repeat_penality_value_asr, dtype=model_D_dtype), device_type_C, DEVICE_ID)
         if slide_repeat_penality_value_asr != 1.0:
             DO_REPEAT_PENALITY = True
         else:
             DO_REPEAT_PENALITY = False
         if USE_BEAM_SEARCH:
             init_save_id_greedy = None
-            penality_reset_count_beam = onnxruntime.OrtValue.ortvalue_from_numpy(
-                np.zeros(slide_beam_size_asr, dtype=np.int32), device_type_C, DEVICE_ID)
+            penality_reset_count_beam = onnxruntime.OrtValue.ortvalue_from_numpy(np.zeros(slide_beam_size_asr, dtype=np.int32), device_type_C, DEVICE_ID)
             init_penality_reset_count_beam = penality_reset_count_beam._ortvalue
         else:
             init_penality_reset_count_beam = 0
             init_save_id_greedy = np.zeros(MAX_SEQ_LEN_ASR, dtype=np.int32)
         if asr_type != 0 or device_type_C != 'cpu':
             if device_type_C != 'dml':
-                past_keys_D = onnxruntime.OrtValue.ortvalue_from_numpy(
-                    np.zeros((1, ort_session_D._outputs_meta[0].shape[1], ort_session_D._outputs_meta[0].shape[2], 0),
-                             dtype=model_D_dtype), device_type_C, DEVICE_ID)
-                past_values_D = onnxruntime.OrtValue.ortvalue_from_numpy(np.zeros(
-                    (1, ort_session_D._outputs_meta[num_layers].shape[1], 0,
-                     ort_session_D._outputs_meta[num_layers].shape[3]), dtype=model_D_dtype), device_type_C, DEVICE_ID)
+                past_keys_D = onnxruntime.OrtValue.ortvalue_from_numpy(np.zeros((1, ort_session_D._outputs_meta[0].shape[1], ort_session_D._outputs_meta[0].shape[2], 0), dtype=model_D_dtype), device_type_C, DEVICE_ID)
+                past_values_D = onnxruntime.OrtValue.ortvalue_from_numpy(np.zeros((1, ort_session_D._outputs_meta[num_layers].shape[1], 0, ort_session_D._outputs_meta[num_layers].shape[3]), dtype=model_D_dtype), device_type_C, DEVICE_ID)
             else:
-                past_keys_D = onnxruntime.OrtValue.ortvalue_from_numpy(
-                    np.zeros((1, ort_session_D._outputs_meta[0].shape[1], ort_session_D._outputs_meta[0].shape[2], 0),
-                             dtype=model_D_dtype), 'cpu', DEVICE_ID)
-                past_values_D = onnxruntime.OrtValue.ortvalue_from_numpy(np.zeros(
-                    (1, ort_session_D._outputs_meta[num_layers].shape[1], 0,
-                     ort_session_D._outputs_meta[num_layers].shape[3]), dtype=model_D_dtype), 'cpu', DEVICE_ID)
+                past_keys_D = onnxruntime.OrtValue.ortvalue_from_numpy(np.zeros((1, ort_session_D._outputs_meta[0].shape[1], ort_session_D._outputs_meta[0].shape[2], 0), dtype=model_D_dtype), 'cpu', DEVICE_ID)
+                past_values_D = onnxruntime.OrtValue.ortvalue_from_numpy(np.zeros((1, ort_session_D._outputs_meta[num_layers].shape[1], 0, ort_session_D._outputs_meta[num_layers].shape[3]), dtype=model_D_dtype), 'cpu', DEVICE_ID)
         else:
             if device_type_C != 'dml':
-                past_keys_D = onnxruntime.OrtValue.ortvalue_from_numpy(
-                    np.zeros((1, ort_session_D._outputs_meta[0].shape[1], 0), dtype=model_D_dtype), device_type_C,
-                    DEVICE_ID)
-                past_values_D = onnxruntime.OrtValue.ortvalue_from_numpy(
-                    np.zeros((1, 0, ort_session_D._outputs_meta[num_layers].shape[2]), dtype=model_D_dtype),
-                    device_type_C, DEVICE_ID)
+                past_keys_D = onnxruntime.OrtValue.ortvalue_from_numpy(np.zeros((1, ort_session_D._outputs_meta[0].shape[1], 0), dtype=model_D_dtype), device_type_C, DEVICE_ID)
+                past_values_D = onnxruntime.OrtValue.ortvalue_from_numpy(np.zeros((1, 0, ort_session_D._outputs_meta[num_layers].shape[2]), dtype=model_D_dtype), device_type_C, DEVICE_ID)
             else:
-                past_keys_D = onnxruntime.OrtValue.ortvalue_from_numpy(
-                    np.zeros((1, ort_session_D._outputs_meta[0].shape[1], 0), dtype=model_D_dtype), 'cpu', DEVICE_ID)
-                past_values_D = onnxruntime.OrtValue.ortvalue_from_numpy(
-                    np.zeros((1, 0, ort_session_D._outputs_meta[num_layers].shape[2]), dtype=model_D_dtype), 'cpu',
-                    DEVICE_ID)
+                past_keys_D = onnxruntime.OrtValue.ortvalue_from_numpy(np.zeros((1, ort_session_D._outputs_meta[0].shape[1], 0), dtype=model_D_dtype), 'cpu', DEVICE_ID)
+                past_values_D = onnxruntime.OrtValue.ortvalue_from_numpy(np.zeros((1, 0, ort_session_D._outputs_meta[num_layers].shape[2]), dtype=model_D_dtype), 'cpu', DEVICE_ID)
         batch_size = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([1], dtype=np.int64), device_type_C, DEVICE_ID)
         init_attention_mask_D_0 = attention_mask_D_0._ortvalue
         init_attention_mask_D_1 = attention_mask_D_1._ortvalue
@@ -2387,18 +2307,13 @@ def MAIN_PROCESS(
         init_past_values_D = past_values_D._ortvalue
         init_batch_size = batch_size._ortvalue
         if USE_BEAM_SEARCH:
-            topK = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([slide_top_k_asr], dtype=np.int64), device_type_C,
-                                                            DEVICE_ID)
-            save_id_beam = onnxruntime.OrtValue.ortvalue_from_numpy(np.zeros((slide_beam_size_asr, 0), dtype=np.int32),
-                                                                    device_type_C, DEVICE_ID)
-            beam_size = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([slide_beam_size_asr], dtype=np.int64),
-                                                                 device_type_C, DEVICE_ID)
+            topK = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([slide_top_k_asr], dtype=np.int64), device_type_C, DEVICE_ID)
+            save_id_beam = onnxruntime.OrtValue.ortvalue_from_numpy(np.zeros((slide_beam_size_asr, 0), dtype=np.int32), device_type_C, DEVICE_ID)
+            beam_size = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([slide_beam_size_asr], dtype=np.int64), device_type_C, DEVICE_ID)
             init_topK = topK._ortvalue
             init_save_id_beam = save_id_beam._ortvalue
             init_beam_size = beam_size._ortvalue
-            ort_session_H = onnxruntime.InferenceSession(onnx_model_H, sess_options=session_opts,
-                                                         providers=ORT_Accelerate_Providers_C,
-                                                         provider_options=provider_options_C)
+            ort_session_H = onnxruntime.InferenceSession(onnx_model_H, sess_options=session_opts, providers=ORT_Accelerate_Providers_C, provider_options=provider_options_C)
             in_name_H = ort_session_H.get_inputs()
             out_name_H = ort_session_H.get_outputs()
             amount_of_outputs_H = len(out_name_H)
@@ -2406,18 +2321,14 @@ def MAIN_PROCESS(
             amount_of_outputs_H_minus_2 = amount_of_outputs_H - 2
             in_name_H = [in_name_H[i].name for i in range(len(in_name_H))]
             out_name_H = [out_name_H[i].name for i in range(amount_of_outputs_H)]
-            ort_session_I = onnxruntime.InferenceSession(onnx_model_I, sess_options=session_opts,
-                                                         providers=ORT_Accelerate_Providers_C,
-                                                         provider_options=provider_options_C)
+            ort_session_I = onnxruntime.InferenceSession(onnx_model_I, sess_options=session_opts, providers=ORT_Accelerate_Providers_C, provider_options=provider_options_C)
             in_name_I = ort_session_I.get_inputs()
             out_name_I = ort_session_I.get_outputs()
             amount_of_outputs_I = len(out_name_I)
             amount_of_outputs_I_minus_1 = amount_of_outputs_I - 1
             in_name_I = [in_name_I[i].name for i in range(len(in_name_I))]
             out_name_I = [out_name_I[i].name for i in range(amount_of_outputs_I)]
-            ort_session_J = onnxruntime.InferenceSession(onnx_model_J, sess_options=session_opts,
-                                                         providers=ORT_Accelerate_Providers_C,
-                                                         provider_options=provider_options_C)
+            ort_session_J = onnxruntime.InferenceSession(onnx_model_J, sess_options=session_opts, providers=ORT_Accelerate_Providers_C, provider_options=provider_options_C)
             in_name_J = ort_session_J.get_inputs()
             out_name_J = ort_session_J.get_outputs()
             in_name_J = [in_name_J[i].name for i in range(len(in_name_J))]
@@ -2435,9 +2346,7 @@ def MAIN_PROCESS(
             init_topK = None
             init_save_id_beam = None
             init_beam_size = None
-            ort_session_G = onnxruntime.InferenceSession(onnx_model_G, sess_options=session_opts,
-                                                         providers=ORT_Accelerate_Providers_C,
-                                                         provider_options=provider_options_C)
+            ort_session_G = onnxruntime.InferenceSession(onnx_model_G, sess_options=session_opts, providers=ORT_Accelerate_Providers_C, provider_options=provider_options_C)
             in_name_G = ort_session_G.get_inputs()
             out_name_G = ort_session_G.get_outputs()
             in_name_G = [in_name_G[i].name for i in range(len(in_name_G))]
@@ -2449,8 +2358,7 @@ def MAIN_PROCESS(
         in_name_C0 = in_name_C[0].name
         if asr_type == 1:  # SenseVoice
             in_name_C1 = in_name_C[1].name
-            lang_idx = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([target_language_id], dtype=np.int32),
-                                                                device_type_C, DEVICE_ID)
+            lang_idx = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([target_language_id], dtype=np.int32), device_type_C, DEVICE_ID)
             language_idx = lang_idx._ortvalue
         else:
             in_name_C1 = None
@@ -2473,38 +2381,31 @@ def MAIN_PROCESS(
                 USE_DENOISED = False
                 HAS_CACHE = True
                 if has_cache_otiginal:
-                    audio = np.array(AudioSegment.from_file(input_audio).set_channels(1).set_frame_rate(
-                        SAMPLE_RATE_16K).get_array_of_samples(), dtype=np.float32)
+                    audio = np.array(AudioSegment.from_file(input_audio).set_channels(1).set_frame_rate(SAMPLE_RATE_16K).get_array_of_samples(), dtype=np.float32)
                 else:
-                    audio = np.array(AudioSegment.from_file(input_audio).set_channels(1).set_frame_rate(
-                        SAMPLE_RATE_48K).get_array_of_samples(), dtype=np.int16)
+                    audio = np.array(AudioSegment.from_file(input_audio).set_channels(1).set_frame_rate(SAMPLE_RATE_48K).get_array_of_samples(), dtype=np.int16)
                     sf.write(cache_otiginal, audio, SAMPLE_RATE_48K, format='WAVEX')
                     audio = audio.astype(np.float32)
                     audio_len = len(audio) // 3
                     audio_len_3 = audio_len + audio_len + audio_len
                     audio = np.mean(audio[:audio_len_3].reshape(-1, 3), axis=-1, dtype=np.float32)
                 audio = normalize_to_int16(audio).astype(np.float32)
-                de_audio = np.array(
-                    AudioSegment.from_file(f'./Cache/{file_name}_{model_denoiser}.wav').set_channels(1).set_frame_rate(
-                        SAMPLE_RATE_16K).get_array_of_samples(), dtype=np.float32)
+                de_audio = np.array(AudioSegment.from_file(f'./Cache/{file_name}_{model_denoiser}.wav').set_channels(1).set_frame_rate(SAMPLE_RATE_16K).get_array_of_samples(), dtype=np.float32)
                 min_len = min(audio.shape[-1], de_audio.shape[-1])
                 audio = audio[:min_len] * slider_denoise_factor_minus + de_audio[:min_len] * slider_denoise_factor
                 del de_audio
             else:
-                audio = np.array(AudioSegment.from_file(input_audio).set_channels(1).set_frame_rate(
-                    SAMPLE_RATE_48K).get_array_of_samples(), dtype=np.int16)
+                audio = np.array(AudioSegment.from_file(input_audio).set_channels(1).set_frame_rate(SAMPLE_RATE_48K).get_array_of_samples(), dtype=np.int16)
                 if not has_cache_otiginal:
                     sf.write(cache_otiginal, audio, SAMPLE_RATE_48K, format='WAVEX')
                 audio = audio.astype(np.float32)
                 if FIRST_RUN:
                     def setup_denoiser_session(onnx_model_A):
-                        def try_create_session_with_config(providers, options, device_name, onnx_model_A,
-                                                           config_setup=None, config_cleanup=None):
+                        def try_create_session_with_config(providers, options, device_name, onnx_model_A, config_setup=None, config_cleanup=None):
                             try:
                                 if config_setup:
                                     config_setup()
-                                session = onnxruntime.InferenceSession(onnx_model_A, sess_options=session_opts,
-                                                                       providers=providers, provider_options=options)
+                                session = onnxruntime.InferenceSession(onnx_model_A, sess_options=session_opts, providers=providers, provider_options=options)
                                 if len(session.get_providers()) > 1:
                                     print(f'\nDenoiser: {device_name} 使用成功。{device_name} used successfully.')
                                     return session, True
@@ -2519,8 +2420,7 @@ def MAIN_PROCESS(
                                     config_cleanup()
 
                         def is_special_model():
-                            return any(model in model_denoiser for model in
-                                       ['ZipEnhancer', 'MossFormerGAN_SE_16K', 'MossFormer2_SE_48K'])
+                            return any(model in model_denoiser for model in ['ZipEnhancer', 'MossFormerGAN_SE_16K', 'MossFormer2_SE_48K'])
 
                         # Load Denoiser model
                         ort_session_A = None
@@ -2545,10 +2445,7 @@ def MAIN_PROCESS(
                                             'enable_qdq_optimizer': False,
                                             'disable_dynamic_shapes': True
                                         }]
-                                        ort_session_A = onnxruntime.InferenceSession(onnx_model_A,
-                                                                                     sess_options=session_opts,
-                                                                                     providers=openvino_providers,
-                                                                                     provider_options=openvino_options)
+                                        ort_session_A = onnxruntime.InferenceSession(onnx_model_A, sess_options=session_opts, providers=openvino_providers, provider_options=openvino_options)
 
                                     elif 'CoreMLExecutionProvider' in usable_providers:
                                         # CoreML CPU configuration
@@ -2558,12 +2455,7 @@ def MAIN_PROCESS(
                                         def cleanup_coreml_cpu():
                                             provider_options[0]['MLComputeUnits'] = 'ALL'
 
-                                        ort_session_A, _ = try_create_session_with_config(ORT_Accelerate_Providers,
-                                                                                          provider_options,
-                                                                                          'Apple-CoreML-CPU',
-                                                                                          onnx_model_A,
-                                                                                          setup_coreml_cpu,
-                                                                                          cleanup_coreml_cpu)
+                                        ort_session_A, _ = try_create_session_with_config(ORT_Accelerate_Providers, provider_options, 'Apple-CoreML-CPU', onnx_model_A, setup_coreml_cpu, cleanup_coreml_cpu)
                             else:
                                 # Non-CPU logic
                                 if 'OpenVINOExecutionProvider' in ORT_Accelerate_Providers[0]:
@@ -2580,16 +2472,14 @@ def MAIN_PROCESS(
                                     # Try NPU first if available
                                     if has_npu:
                                         provider_options[0]['device_type'] = 'NPU'
-                                        ort_session_A, success = try_create_session_with_config(
-                                            ORT_Accelerate_Providers, provider_options, 'OpenVINO-NPU', onnx_model_A)
+                                        ort_session_A, success = try_create_session_with_config(ORT_Accelerate_Providers, provider_options, 'OpenVINO-NPU', onnx_model_A)
                                         if success:
                                             device_type_A = 'npu'
 
                                     # Try GPU if NPU failed or not available
                                     if ort_session_A is None:
                                         provider_options[0]['device_type'] = 'GPU'
-                                        ort_session_A, success = try_create_session_with_config(
-                                            ORT_Accelerate_Providers, provider_options, 'OpenVINO-GPU', onnx_model_A)
+                                        ort_session_A, success = try_create_session_with_config(ORT_Accelerate_Providers, provider_options, 'OpenVINO-GPU', onnx_model_A)
                                         if success:
                                             device_type_A = device_type
 
@@ -2603,24 +2493,16 @@ def MAIN_PROCESS(
                                     def cleanup_coreml_gpu():
                                         provider_options[0]['RequireStaticInputShapes'] = '0'
 
-                                    ort_session_A, _ = try_create_session_with_config(ORT_Accelerate_Providers,
-                                                                                      provider_options,
-                                                                                      'Apple-CoreML-GPU_NPU',
-                                                                                      onnx_model_A, setup_coreml_gpu,
-                                                                                      cleanup_coreml_gpu)
+                                    ort_session_A, _ = try_create_session_with_config(ORT_Accelerate_Providers, provider_options, 'Apple-CoreML-GPU_NPU', onnx_model_A, setup_coreml_gpu, cleanup_coreml_gpu)
 
                                 else:
                                     # Other providers
-                                    ort_session_A, _ = try_create_session_with_config(ORT_Accelerate_Providers,
-                                                                                      provider_options, 'GPU_NPU',
-                                                                                      onnx_model_A)
+                                    ort_session_A, _ = try_create_session_with_config(ORT_Accelerate_Providers, provider_options, 'GPU_NPU', onnx_model_A)
 
                         # Fallback to CPU if all attempts failed
                         if ort_session_A is None:
                             onnx_model_A = onnx_model_A.replace('FP16', 'FP32')
-                            ort_session_A = onnxruntime.InferenceSession(onnx_model_A, sess_options=session_opts,
-                                                                         providers=['CPUExecutionProvider'],
-                                                                         provider_options=None)
+                            ort_session_A = onnxruntime.InferenceSession(onnx_model_A, sess_options=session_opts, providers=['CPUExecutionProvider'], provider_options=None)
 
                         # Setup input/output metadata
                         in_name_A = ort_session_A.get_inputs()
@@ -2639,15 +2521,12 @@ def MAIN_PROCESS(
                         return ort_session_A, device_type_A, in_name_A0, out_name_A0, INPUT_AUDIO_LENGTH_A, stride_step_A
 
                     # Call the function
-                    ort_session_A, device_type_A, in_name_A0, out_name_A0, INPUT_AUDIO_LENGTH_A, stride_step_A = setup_denoiser_session(
-                        onnx_model_A)
+                    ort_session_A, device_type_A, in_name_A0, out_name_A0, INPUT_AUDIO_LENGTH_A, stride_step_A = setup_denoiser_session(onnx_model_A)
         else:
             if has_cache_otiginal:
-                audio = np.array(AudioSegment.from_file(input_audio).set_channels(1).set_frame_rate(
-                    SAMPLE_RATE_16K).get_array_of_samples(), dtype=np.float32)
+                audio = np.array(AudioSegment.from_file(input_audio).set_channels(1).set_frame_rate(SAMPLE_RATE_16K).get_array_of_samples(), dtype=np.float32)
             else:
-                audio = np.array(AudioSegment.from_file(input_audio).set_channels(1).set_frame_rate(
-                    SAMPLE_RATE_48K).get_array_of_samples(), dtype=np.int16)
+                audio = np.array(AudioSegment.from_file(input_audio).set_channels(1).set_frame_rate(SAMPLE_RATE_48K).get_array_of_samples(), dtype=np.int16)
                 sf.write(cache_otiginal, audio, SAMPLE_RATE_48K, format='WAVEX')
                 audio = audio.astype(np.float32)
                 audio_len = len(audio) // 3
@@ -2673,10 +2552,7 @@ def MAIN_PROCESS(
                 total_length_needed = (num_windows - 1) * stride_step_A + INPUT_AUDIO_LENGTH_A
                 pad_amount = total_length_needed - audio_len
                 final_slice = audio[..., -pad_amount:].astype(np.float32)
-                white_noise = (np.sqrt(np.mean(final_slice * final_slice, dtype=np.float32),
-                                       dtype=np.float32) * np.random.normal(loc=0.0, scale=1.0,
-                                                                            size=(1, 1, pad_amount))).astype(
-                    audio.dtype)
+                white_noise = (np.sqrt(np.mean(final_slice * final_slice, dtype=np.float32), dtype=np.float32) * np.random.normal(loc=0.0, scale=1.0, size=(1, 1, pad_amount))).astype(audio.dtype)
                 audio = np.concatenate((audio, white_noise), axis=-1)
                 del final_slice
                 del pad_amount
@@ -2685,10 +2561,7 @@ def MAIN_PROCESS(
                 del white_noise
             elif audio_len < INPUT_AUDIO_LENGTH_A:
                 audio_float = audio.astype(np.float32)
-                white_noise = (np.sqrt(np.mean(audio_float * audio_float, dtype=np.float32),
-                                       dtype=np.float32) * np.random.normal(loc=0.0, scale=1.0, size=(1, 1,
-                                                                                                      INPUT_AUDIO_LENGTH_A - audio_len))).astype(
-                    audio.dtype)
+                white_noise = (np.sqrt(np.mean(audio_float * audio_float, dtype=np.float32), dtype=np.float32) * np.random.normal(loc=0.0, scale=1.0, size=(1, 1, INPUT_AUDIO_LENGTH_A - audio_len))).astype(audio.dtype)
                 audio = np.concatenate((audio, white_noise), axis=-1)
                 del audio_float
                 del white_noise
@@ -2730,9 +2603,7 @@ def MAIN_PROCESS(
         start_time = time.time()
         if vad_type != -1:
             if USE_DENOISED or HAS_CACHE:
-                waveform = np.array(
-                    AudioSegment.from_file(f'./Cache/{file_name}_{model_denoiser}.wav').set_channels(1).set_frame_rate(
-                        SAMPLE_RATE_16K).get_array_of_samples(), dtype=np.float32)
+                waveform = np.array(AudioSegment.from_file(f'./Cache/{file_name}_{model_denoiser}.wav').set_channels(1).set_frame_rate(SAMPLE_RATE_16K).get_array_of_samples(), dtype=np.float32)
                 waveform = normalize_to_int16(waveform)
                 waveform = waveform.reshape(1, 1, -1)
             else:
@@ -2748,11 +2619,7 @@ def MAIN_PROCESS(
                 'min_silence_duration_ms': slider_vad_MIN_SILENCE_DURATION,
                 'speech_pad_ms': slider_vad_pad
             }
-            timestamps = get_speech_timestamps_FW(
-                (waveform.reshape(-1).astype(np.float32) * inv_int16),
-                vad_options=VadOptions(**vad_options),
-                sampling_rate=SAMPLE_RATE_16K
-            )
+            timestamps = get_speech_timestamps_FW((waveform.reshape(-1).astype(np.float32) * inv_int16), vad_options=VadOptions(**vad_options), sampling_rate=SAMPLE_RATE_16K)
             timestamps = [(item['start'] * inv_16k, item['end'] * inv_16k) for item in timestamps]
             del waveform
         elif vad_type == 2:
@@ -2789,8 +2656,7 @@ def MAIN_PROCESS(
                 waveform = torch.from_numpy(waveform.reshape(-1).astype(np.float32) * inv_16k)
                 waveform_len = len(waveform)
                 if waveform_len > INPUT_AUDIO_LENGTH_B:
-                    num_windows = int(
-                        torch.ceil(torch.tensor((waveform_len - INPUT_AUDIO_LENGTH_B) / stride_step_B))) + 1
+                    num_windows = int(torch.ceil(torch.tensor((waveform_len - INPUT_AUDIO_LENGTH_B) / stride_step_B))) + 1
                     total_length_needed = (num_windows - 1) * stride_step_B + INPUT_AUDIO_LENGTH_B
                     pad_amount = total_length_needed - waveform_len
                     final_slice = waveform[-pad_amount:]
@@ -2806,8 +2672,7 @@ def MAIN_PROCESS(
                     del num_windows
                 elif waveform_len < INPUT_AUDIO_LENGTH_B:
                     rms = torch.sqrt(torch.mean(waveform * waveform))
-                    white_noise = rms * torch.randn(INPUT_AUDIO_LENGTH_B - audio_len, device=waveform.device,
-                                                    dtype=waveform.dtype)
+                    white_noise = rms * torch.randn(INPUT_AUDIO_LENGTH_B - audio_len, device=waveform.device, dtype=waveform.dtype)
                     waveform = torch.cat((waveform, white_noise), dim=-1)
                     waveform_len = len(waveform)
                     del rms
@@ -2831,8 +2696,7 @@ def MAIN_PROCESS(
             print(
                 '\nVAD-NVIDIA_Frame_VAD_Multilingual_MarbleNet 不提供可视化的运行进度。\nThe VAD-NVIDIA_Frame_VAD_Multilingual_MarbleNet does not provide the running progress for visualization.\n')
             waveform = onnxruntime.OrtValue.ortvalue_from_numpy(waveform, device_type_B, DEVICE_ID)
-            all_outpus_B = ort_session_B._sess.run_with_ort_values({in_name_B0: waveform._ortvalue}, out_name_B,
-                                                                   run_options)
+            all_outpus_B = ort_session_B._sess.run_with_ort_values({in_name_B0: waveform._ortvalue}, out_name_B, run_options)
             score_silence = all_outpus_B[0].numpy()
             score_active = all_outpus_B[1].numpy()
             signal_len = all_outpus_B[2].numpy()
@@ -2862,9 +2726,7 @@ def MAIN_PROCESS(
                 total_length_needed = (num_windows - 1) * stride_step_B + INPUT_AUDIO_LENGTH_B
                 pad_amount = total_length_needed - audio_len
                 final_slice = waveform[-pad_amount:].astype(np.float32)
-                white_noise = (np.sqrt(np.mean(final_slice * final_slice, dtype=np.float32),
-                                       dtype=np.float32) * np.random.normal(loc=0.0, scale=1.0,
-                                                                            size=(pad_amount))).astype(waveform.dtype)
+                white_noise = (np.sqrt(np.mean(final_slice * final_slice, dtype=np.float32), dtype=np.float32) * np.random.normal(loc=0.0, scale=1.0, size=(pad_amount))).astype(waveform.dtype)
                 waveform = np.concatenate((waveform, white_noise), axis=-1)
                 del white_noise
                 del final_slice
@@ -2873,9 +2735,7 @@ def MAIN_PROCESS(
                 del num_windows
             elif audio_len < INPUT_AUDIO_LENGTH_B:
                 audio_float = waveform.astype(np.float32)
-                white_noise = (np.sqrt(np.mean(audio_float * audio_float, dtype=np.float32),
-                                       dtype=np.float32) * np.random.normal(loc=0.0, scale=1.0, size=(
-                            INPUT_AUDIO_LENGTH_B - audio_len))).astype(waveform.dtype)
+                white_noise = (np.sqrt(np.mean(audio_float * audio_float, dtype=np.float32), dtype=np.float32) * np.random.normal(loc=0.0, scale=1.0, size=(INPUT_AUDIO_LENGTH_B - audio_len))).astype(waveform.dtype)
                 waveform = np.concatenate((waveform, white_noise), axis=-1)
                 del audio_float
                 del white_noise
@@ -2927,12 +2787,10 @@ def MAIN_PROCESS(
                  init_penality_reset_count_beam, init_save_id_greedy, True) for start, end in timestamps]
             results = run_inference_x(inference_CD_beam_search, args_list, progress_prefix='ASR')
         elif asr_type == 1:
-            args_list = [(max_asr_segment, start, end, inv_audio_len, audio, SAMPLE_RATE_16K, language_idx) for
-                         start, end in timestamps]
+            args_list = [(max_asr_segment, start, end, inv_audio_len, audio, SAMPLE_RATE_16K, language_idx) for start, end in timestamps]
             results = run_inference_x(inference_C_sensevoice, args_list, progress_prefix='ASR')
         elif asr_type == 2:
-            args_list = [(max_asr_segment, start, end, inv_audio_len, audio, SAMPLE_RATE_16K, is_english) for start, end
-                         in timestamps]
+            args_list = [(max_asr_segment, start, end, inv_audio_len, audio, SAMPLE_RATE_16K, is_english) for start, end in timestamps]
             results = run_inference_x(inference_C_paraformer, args_list, progress_prefix='ASR')
         elif asr_type == 3:
             args_list = [
@@ -3117,11 +2975,7 @@ def MAIN_PROCESS(
                     prompt_tail = tokenizer_llm(prompt_tail, return_tensors='np')['input_ids'].astype(np.int32)
 
                 # Load the LLM
-                ort_session_E, use_sync_operations_E, device_type, _, _ = create_ort_session(device_type, False,
-                                                                                             llm_path + '/llm.onnx',
-                                                                                             ORT_Accelerate_Providers,
-                                                                                             session_opts,
-                                                                                             provider_options, 'LLM')
+                ort_session_E, use_sync_operations_E, device_type, _, _ = create_ort_session(device_type, False, llm_path + '/llm.onnx', ORT_Accelerate_Providers, session_opts, provider_options, 'LLM')
                 print(f"\nLLM 可用的硬件 LLM-Usable Providers: {ort_session_E.get_providers()}")
                 device_type_ort = get_ort_device(device_type, DEVICE_ID)
                 io_binding_E = ort_session_E.io_binding()._iobinding
@@ -3133,28 +2987,18 @@ def MAIN_PROCESS(
                 out_name_E = [output_metas_E[i].name for i in range(amount_of_outputs_E)]
                 num_layers = (amount_of_outputs_E - 2) // 2
                 num_keys_values = num_layers + num_layers
-                init_attention_mask_E_0 = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([0], dtype=np.int8),
-                                                                                   device_type, DEVICE_ID)
-                init_attention_mask_E_1 = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([1], dtype=np.int8),
-                                                                                   device_type, DEVICE_ID)
-                init_history_len = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([0], dtype=np.int64), device_type,
-                                                                            DEVICE_ID)
-                init_ids_len_1 = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([1], dtype=np.int64), device_type,
-                                                                          DEVICE_ID)
+                init_attention_mask_E_0 = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([0], dtype=np.int8), device_type, DEVICE_ID)
+                init_attention_mask_E_1 = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([1], dtype=np.int8), device_type, DEVICE_ID)
+                init_history_len = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([0], dtype=np.int64), device_type, DEVICE_ID)
+                init_ids_len_1 = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([1], dtype=np.int64), device_type, DEVICE_ID)
                 if device_type != 'dml':
-                    init_past_keys_E = onnxruntime.OrtValue.ortvalue_from_numpy(
-                        np.zeros((output_metas_E[0].shape[0], 1, output_metas_E[0].shape[2], 0), dtype=np.float32),
-                        device_type, DEVICE_ID)
+                    init_past_keys_E = onnxruntime.OrtValue.ortvalue_from_numpy(np.zeros((output_metas_E[0].shape[0], 1, output_metas_E[0].shape[2], 0), dtype=np.float32), device_type, DEVICE_ID)
                     init_past_values_E = onnxruntime.OrtValue.ortvalue_from_numpy(
-                        np.zeros((output_metas_E[num_layers].shape[0], 1, 0, output_metas_E[num_layers].shape[-1]),
-                                 dtype=np.float32), device_type, DEVICE_ID)
+                        np.zeros((output_metas_E[num_layers].shape[0], 1, 0, output_metas_E[num_layers].shape[-1]), dtype=np.float32), device_type, DEVICE_ID)
                 else:
-                    init_past_keys_E = onnxruntime.OrtValue.ortvalue_from_numpy(
-                        np.zeros((output_metas_E[0].shape[0], 1, output_metas_E[0].shape[2], 0), dtype=np.float32),
-                        'cpu', DEVICE_ID)
+                    init_past_keys_E = onnxruntime.OrtValue.ortvalue_from_numpy(np.zeros((output_metas_E[0].shape[0], 1, output_metas_E[0].shape[2], 0), dtype=np.float32), 'cpu', DEVICE_ID)
                     init_past_values_E = onnxruntime.OrtValue.ortvalue_from_numpy(
-                        np.zeros((output_metas_E[num_layers].shape[0], 1, 0, output_metas_E[num_layers].shape[-1]),
-                                 dtype=np.float32), 'cpu', DEVICE_ID)
+                        np.zeros((output_metas_E[num_layers].shape[0], 1, 0, output_metas_E[num_layers].shape[-1]), dtype=np.float32), 'cpu', DEVICE_ID)
 
                 # Do not use X = X._ortvalue, it will error out. Must create a new one.
                 init_past_keys_E_ort = init_past_keys_E._ortvalue
@@ -3197,13 +3041,10 @@ def MAIN_PROCESS(
                 translation_prompt = (''.join(asr_lines[chunk_start: chunk_end]))
                 print('\n' + translation_prompt)
                 if is_seed_x:
-                    input_ids = tokenizer_llm(prompt_head + translation_prompt + prompt_tail, return_tensors='np')[
-                        'input_ids'].astype(np.int32)
+                    input_ids = tokenizer_llm(prompt_head + translation_prompt + prompt_tail, return_tensors='np')['input_ids'].astype(np.int32)
                 else:
-                    input_ids = np.concatenate((prompt_head, tokenizer_llm(translation_prompt, return_tensors='np')[
-                        'input_ids'].astype(np.int32), prompt_tail), axis=1)
-                ids_len = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([input_ids.shape[-1]], dtype=np.int64),
-                                                                   device_type, DEVICE_ID)
+                    input_ids = np.concatenate((prompt_head, tokenizer_llm(translation_prompt, return_tensors='np')['input_ids'].astype(np.int32), prompt_tail), axis=1)
+                ids_len = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([input_ids.shape[-1]], dtype=np.int64), device_type, DEVICE_ID)
                 input_ids = onnxruntime.OrtValue.ortvalue_from_numpy(input_ids, device_type, DEVICE_ID)
                 init_input_feed_E[-4] = input_ids._ortvalue
                 init_input_feed_E[-2] = ids_len._ortvalue
@@ -3228,8 +3069,7 @@ def MAIN_PROCESS(
                         io_binding_E.bind_ortvalue_input(in_name_E[-1], init_attention_mask_E_0_ort)
                         io_binding_E.bind_ortvalue_input(in_name_E[-2], init_ids_len_1_ort)
                     bind_inputs_to_device(io_binding_E, in_name_E, all_outputs_E, amount_of_outputs_E)
-                    text = tokenizer_llm.decode(max_logit_ids, skip_special_tokens=True,
-                                                clean_up_tokenization_spaces=False)
+                    text = tokenizer_llm.decode(max_logit_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)
                     save_text += text
                     if is_seed_x:
                         if '[COT]' in save_text:
@@ -3239,8 +3079,7 @@ def MAIN_PROCESS(
                 print(f'\n\nDecode: {(num_decode / (time.time() - start_time)):.3f} token/s')
                 translated_responses.append(save_text)
                 print(f'Translating: - {chunk_end * inv_total_lines:.3f}%')
-                print(
-                    '----------------------------------------------------------------------------------------------------------')
+                print('----------------------------------------------------------------------------------------------------------')
                 if chunk_end == total_lines:
                     break
             merged_responses = '\n'.join(translated_responses).split('\n')
@@ -3271,8 +3110,7 @@ def MAIN_PROCESS(
                                     continue
                                 if line_index < timestamp_len:
                                     text = ''.join(parts[1:])
-                                    subtitles_file.write(
-                                        f'{line_index}\n{timestamp_lines[line_index]}{text.strip()}\n\n')
+                                    subtitles_file.write(f'{line_index}\n{timestamp_lines[line_index]}{text.strip()}\n\n')
                                     save_line_index.append(line_index)
             print(f'\n翻译完成。LLM Translate Complete.\nTime Cost: {time.time() - start_time:.3f} Seconds')
             print(
@@ -3824,3 +3662,4 @@ if __name__ == "__main__":
 
     GUI = create_interface()
     GUI.launch()
+    
