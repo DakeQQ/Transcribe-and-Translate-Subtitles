@@ -1741,16 +1741,16 @@ def MAIN_PROCESS(
                     'device_id': DEVICE_ID,
                     'user_compute_stream': "",
                     'nv_runtime_cache_path': "./TensorRT_Cache",
-                    'nv_max_workspace_size': 0,  # 0 for Auto
+                    'nv_max_workspace_size': 0,   # 0 for Auto
                     'nv_max_shared_mem_size': 0,  # 0 for Auto
                     'nv_dump_subgraphs': False,
                     'nv_cuda_graph_enable': False,
                     'nv_detailed_build_log': False,
                     'nv_multi_profile_enable': False,
                     'nv_use_external_data_initializer': False,
-                    'nv_profile_min_shapes': 'input_tensor_1:1x1x4800',
-                    'nv_profile_max_shapes': 'input_tensor_1:1x1x960000',
-                    'nv_profile_opt_shapes': 'input_tensor_1:1x1x480000'
+                    'nv_profile_min_shapes': 'input_tensor_1:1x1x48000',
+                    'nv_profile_max_shapes': 'input_tensor_1:1x1x144000',
+                    'nv_profile_opt_shapes': 'input_tensor_1:1x1x96000'
                 }),
                 ('CUDAExecutionProvider', cuda_options)
             ]
@@ -1763,30 +1763,30 @@ def MAIN_PROCESS(
                     'nv_dump_subgraphs': False,
                     'nv_cuda_graph_enable': False,
                     'nv_detailed_build_log': False,
-                    'nv_profile_min_shapes': 'input_tensor_1:1x1x4800',
-                    'nv_profile_max_shapes': 'input_tensor_1:1x1x960000',
-                    'nv_profile_opt_shapes': 'input_tensor_1:1x1x480000'
+                    'nv_profile_min_shapes': 'input_tensor_1:1x1x48000',
+                    'nv_profile_max_shapes': 'input_tensor_1:1x1x144000',
+                    'nv_profile_opt_shapes': 'input_tensor_1:1x1x96000'
                 }
             ]
     elif 'TensorrtExecutionProvider' in ORT_Accelerate_Providers[0]:
         trt_options = {
             'device_id': DEVICE_ID,
             'trt_detailed_build_log': False,
+            'trt_engine_cache_enable': True,
             'trt_timing_cache_enable': True,
             'trt_force_timing_cache': True,
+            'trt_dump_ep_context_model': True,
             'trt_timing_cache_path': "./TensorRT_Cache",
+            'trt_engine_cache_path': "./TensorRT_Cache",
+            'trt_ep_context_file_path': "./TensorRT_Cache",
             'trt_layer_norm_fp32_fallback': False,
             'trt_context_memory_sharing_enable': True,
-            'trt_dump_subgraphs': False,
+            'trt_dump_subgraphs': False,                 # True for debug
             'trt_force_sequential_engine_build': False,  # For multi-GPU
             'trt_dla_enable': True,
-            'trt_build_heuristics_enable': True,
-            'trt_sparsity_enable': True,
-            'trt_engine_hw_compatible': True,
-            'trt_engine_cache_enable': True,
-            'trt_engine_cache_path': "./TensorRT_Cache",
-            'trt_dump_ep_context_model': True,
-            'trt_ep_context_file_path': "./TensorRT_Cache",
+            'trt_build_heuristics_enable': True,         # True for boost building time
+            'trt_sparsity_enable': False,                # True for performance but loss accuracy
+            'trt_engine_hw_compatible': False,           # True for Ampere+ hardware compatibility (if compiled model share using). False for better performance on fixed device.
             'trt_cuda_graph_enable': False,
             'trt_fp16_enable': True,
             'trt_int8_enable': False,
@@ -1795,9 +1795,9 @@ def MAIN_PROCESS(
             'trt_max_workspace_size': 64 * 1073741824,  # 64GB
             'trt_builder_optimization_level': 5,
             'trt_auxiliary_streams': -1,
-            'trt_profile_min_shapes': 'input_tensor_1:1x1x4800',
-            'trt_profile_max_shapes': 'input_tensor_1:1x1x960000',
-            'trt_profile_opt_shapes': 'input_tensor_1:1x1x480000'
+            'trt_profile_min_shapes': 'input_1:1x1x48000',
+            'trt_profile_max_shapes': 'input_1:1x1x144000',
+            'trt_profile_opt_shapes': 'input_1:1x1x96000'
         }
         if len(ORT_Accelerate_Providers) > 1:
             ORT_Accelerate_Providers = [
