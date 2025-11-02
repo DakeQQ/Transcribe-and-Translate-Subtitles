@@ -1344,10 +1344,12 @@ def MAIN_PROCESS(
                     if max_logits_idx in ASR_STOP_TOKEN:
                         break
                     input_feed_D[in_name_D[num_keys_values]] = all_outputs_G[0]
-                    if DO_REPEAT_PENALITY and (num_decode >= PENALITY_RANGE) and (_init_save_id_greedy[penality_reset_count_greedy] != max_logits_idx):
-                        repeat_penality = all_outputs_G[1].numpy()
-                        repeat_penality[..., penality_reset_count_greedy] = 1.0
-                        input_feed_G[in_name_G[1]].update_inplace(repeat_penality)
+                    if DO_REPEAT_PENALITY and (num_decode >= PENALITY_RANGE):
+                        reset_ids = _init_save_id_greedy[penality_reset_count_greedy]
+                        if reset_ids != max_logits_idx:
+                            repeat_penality = all_outputs_G[1].numpy()
+                            repeat_penality[..., reset_ids] = 1.0
+                            input_feed_G[in_name_G[1]].update_inplace(repeat_penality)
                         penality_reset_count_greedy += 1
                     else:
                         input_feed_G[in_name_G[1]] = all_outputs_G[1]
@@ -1497,11 +1499,12 @@ def MAIN_PROCESS(
                     if max_logits_idx in ASR_STOP_TOKEN:
                         break
                     input_feed_D[in_name_D[num_keys_values]] = all_outputs_G[0]
-                    if DO_REPEAT_PENALITY and (num_decode >= PENALITY_RANGE) and (
-                            _init_save_id_greedy[penality_reset_count_greedy] != max_logits_idx):
-                        repeat_penality = all_outputs_G[1].numpy()
-                        repeat_penality[..., penality_reset_count_greedy] = 1.0
-                        input_feed_G[in_name_G[1]].update_inplace(repeat_penality)
+                    if DO_REPEAT_PENALITY and (num_decode >= PENALITY_RANGE):
+                        reset_ids = _init_save_id_greedy[penality_reset_count_greedy]
+                        if reset_ids != max_logits_idx:
+                            repeat_penality = all_outputs_G[1].numpy()
+                            repeat_penality[..., reset_ids] = 1.0
+                            input_feed_G[in_name_G[1]].update_inplace(repeat_penality)
                         penality_reset_count_greedy += 1
                     else:
                         input_feed_G[in_name_G[1]] = all_outputs_G[1]
