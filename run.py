@@ -1108,7 +1108,7 @@ def format_time(seconds):
 
 def normalize_to_int16(audio):
     max_val = np.max(np.abs(audio))
-    scaling_factor = 32767.0 / max_val if max_val > 0 else 1.0
+    scaling_factor = 16384.0 / max_val if max_val > 0 else 1.0
     return (audio * scaling_factor).astype(np.int16)
 
 
