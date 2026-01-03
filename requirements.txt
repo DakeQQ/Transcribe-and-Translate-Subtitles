@@ -15,7 +15,7 @@ faster-whisper>=1.2.1  # Use the VAD only.
 pyannote.audio>=4.0.3
 
 # Web interface
-gradio>=5.50.0
+gradio==5.50.0
 brotli>=1.2.0
 
 # ONNX Runtime and Execution Providers
