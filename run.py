@@ -29,17 +29,27 @@ physical_cores = psutil.cpu_count(logical=False)
 print(f'\n找到 {physical_cores} 个物理 CPU 核心。Found {physical_cores} physical CPU cores.\n')
 
 DEVICE_ID = 0
-PENALITY_RANGE = 15  # For ASR decode.
-REMOVE_OVER_TALKING = 5  # The whisper v3 may over decode.
-MAX_SEQ_LEN_LLM = 85  # Do not edit it.
-MAX_SEQ_LEN_ASR = 85  # Do not edit it.
-MAX_ASR_SEGMENT = 320000  # Do not edit it.
-SAMPLE_RATE_48K = 48000  # Do not edit it.
-SAMPLE_RATE_16K = 16000  # Do not edit it.
+PENALITY_RANGE = 15             # For ASR decode.
+REMOVE_OVER_TALKING = 5         # The whisper v3 may over decode.
+MAX_SEQ_LEN_LLM = 85            # Do not edit it.
+MAX_SEQ_LEN_ASR = 85            # Do not edit it.
+MAX_SEQ_LEN_FUNASR_NANO = 1024  # Do not edit it.
+MAX_ASR_SEGMENT = 320000        # Do not edit it.
+SAMPLE_RATE_48K = 48000         # Do not edit it.
+SAMPLE_RATE_16K = 16000         # Do not edit it.
 
 TASK_LIST = ['转录 Transcribe', '转录 + 翻译 Transcribe + Translate']
 
 HARDWARE_LIST = ['CPU', 'GPU_NPU']
+
+ASR_LIST = [
+    'SenseVoice-Small',
+    'FunASR-Nano',
+    'FunASR-Nano-MLT'
+    'Paraformer-Large',
+    'FireRedASR-AED-L',
+    'Dolphin-Small'
+]
 
 WHISPER_ASR_LIST = [
     'Arabic-Whisper-v3',
@@ -76,12 +86,6 @@ WHISPER_ASR_LIST = [
     'Vietnamese-Whisper-v3'
 ]
 
-ASR_LIST = [
-    'SenseVoice-Small',
-    'Paraformer-Large',
-    'FireRedASR-AED-L',
-    'Dolphin-Small'
-]
 for i in WHISPER_ASR_LIST:
     ASR_LIST.append(i)
 
@@ -111,6 +115,75 @@ LLM_LIST = [
     'Hunyuan-MT-7B-Abliterated',
     'Seed-X-PRO-7B',
     'Whisper'
+]
+
+FUNASRNANO_LANGUAGE_LIST = [
+    "Auto              - 自动",
+    "Japanese          - 日语",
+    "Chinese_Mandarin  - 中文_普通话",
+    "Chinese_Beijing   - 中文_北京",
+    "Chinese_Tianjin   - 中文_天津",
+    "Chinese_Hebei     - 中文_河北",
+    "Chinese_Shandong  - 中文_山东",
+    "Chinese_Jinyu     - 中文_晋语",
+    "Chinese_Shaanxi   - 中文_陕西",
+    "Chinese_Gansu     - 中文_甘肃",
+    "Chinese_Ningxia   - 中文_宁夏",
+    "Chinese_Henan     - 中文_河南",
+    "Chinese_Hubei     - 中文_湖北",
+    "Chinese_Sichuan   - 中文_四川",
+    "Chinese_Chongqing - 中文_重庆",
+    "Chinese_Yunnan    - 中文_云南",
+    "Chinese_Guizhou   - 中文_贵州",
+    "Chinese_Xiangyu   - 中文_湘语",
+    "Chinese_Ganyu     - 中文_赣语",
+    "Chinese_Anhui     - 中文_安徽",
+    "Chinese_Jiangsu   - 中文_江苏",
+    "Chinese_Nanjing   - 中文_南京",
+    "Chinese_Hangzhou  - 中文_杭州",
+    "Chinese_Wuyu      - 中文_吴语",
+    "Chinese_Guangdong - 中文_广东",
+    "Chinese_Hong Kong - 中文_香港",
+    "Chinese_Guangxi   - 中文_广西",
+    "Chinese_Cantonese - 中文_粤语",
+    "Chinese_Hakka     - 中文_客家",
+    "Chinese_Minyu     - 中文_闽语",
+    "Chinese_Taiwan    - 中文_台湾"
+]
+
+FUNASRNANO_MLT_LANGUAGE_LIST = [
+    "Auto              - 自动",
+    "Chinese           - 中文",
+    "English           - 英文",
+    "Cantonese         - 粤语",
+    "Japanese          - 日语",
+    "Korean            - 韩语",
+    "Arabic            - 阿拉伯语",
+    "Bulgarian         - 保加利亚语",
+    "Croatian          - 克罗地亚语",
+    "Czech             - 捷克语",
+    "Danish            - 丹麦语",
+    "Dutch             - 荷兰语",
+    "Estonian          - 爱沙尼亚语",
+    "Filipino          - 菲律宾语",
+    "Finnish           - 芬兰语",
+    "Greek             - 希腊语",
+    "Hindi             - 印地语",
+    "Hungarian         - 匈牙利语",
+    "Indonesian        - 印尼语",
+    "Irish             - 爱尔兰语",
+    "Latvian           - 拉脱维亚语",
+    "Lithuanian        - 立陶宛语",
+    "Malay             - 马来语",
+    "Maltese           - 马耳他语",
+    "Polish            - 波兰语",
+    "Portuguese        - 葡萄牙语",
+    "Romanian          - 罗马尼亚语",
+    "Slovak            - 斯洛伐克语",
+    "Slovenian         - 斯洛文尼亚语",
+    "Swedish           - 瑞典语",
+    "Thai              - 泰语",
+    "Vietnamese        - 越南语"
 ]
 
 WHISPER_LANGUAGE_LIST = [
@@ -901,17 +974,29 @@ def update_transcribe_language(dropdown_model_asr):
         update_A = gr.update(visible=True, value=WHISPER_LANGUAGE_LIST[0], choices=[WHISPER_LANGUAGE_LIST[0], WHISPER_LANGUAGE_LIST[1]])
     elif "dolphin-small" in lower_dropdown_model_asr:
         update_A = gr.update(value=DOLPHIN_LANGUAGE_LIST[0], choices=DOLPHIN_LANGUAGE_LIST)
+    elif "funasr-nano-mlt" in lower_dropdown_model_asr:
+        update_A = gr.update(value=FUNASRNANO_MLT_LANGUAGE_LIST[0], choices=FUNASRNANO_MLT_LANGUAGE_LIST)
+    elif "funasr-nano" in lower_dropdown_model_asr:
+        update_A = gr.update(value=FUNASRNANO_LANGUAGE_LIST[0], choices=FUNASRNANO_LANGUAGE_LIST)
     else:
         update_A = gr.update(visible=False)
     if ('sensevoice-small' in lower_dropdown_model_asr) or ('paraformer-large' in lower_dropdown_model_asr):
         update_B = gr.update(visible=False)
         update_C = gr.update(visible=False)
         update_D = gr.update(visible=False)
+        update_E = gr.update(value=0.7)
     else:
-        update_B = gr.update(visible=True)
-        update_C = gr.update(visible=True)
+        if "funasr-nano" in lower_dropdown_model_asr:
+            update_B = gr.update(visible=True, value=1)
+            update_C = gr.update(visible=True, value=1)
+            update_E = gr.update(value=0.5)
+        else:
+            update_B = gr.update(visible=True, value=3)
+            update_C = gr.update(visible=True, value=3)
+            update_E = gr.update(value=0.7)
         update_D = gr.update(visible=True)
-    return update_A, update_B, update_C, update_D
+
+    return update_A, update_B, update_C, update_D, update_E
 
 
 def update_denoiser(dropdown_model_denoiser):
@@ -1106,10 +1191,13 @@ def format_time(seconds):
     return f"{hours:02}:{minutes:02}:{seconds:02}.{milliseconds:03}"
 
 
-def normalize_to_int16(audio):
-    max_val = np.max(np.abs(audio))
-    scaling_factor = 16384.0 / max_val if max_val > 0 else 1.0
-    return (audio * scaling_factor).astype(np.int16)
+def normalizer(_audio, target_value=8192.0, use_float32=False):
+    rms = np.sqrt(np.mean((_audio * _audio), dtype=np.float32), dtype=np.float32)
+    _audio *= (target_value / (rms + 1e-7))
+    np.clip(_audio, -32768.0, 32767.0, out=_audio)
+    if use_float32:
+        return _audio
+    return _audio.astype(np.int16)
 
 
 class Dolphin_Tokenizer:
@@ -1268,7 +1356,7 @@ def MAIN_PROCESS(
     def inference_CD_beam_search(_max_asr_segment, _start, _end, _inv_audio_len, _audio, _sample_rate, _init_input_ids,
                                  _init_history_len, _init_ids_len, _init_ids_len_1, _init_attention_mask_D_0,
                                  _init_attention_mask_D_1, _init_past_keys_D, _init_past_values_D, _init_save_id_beam,
-                                 _init_repeat_penality, _init_batch_size, _init_penality_reset_count_beam,
+                                 _init_repeat_penality, _init_batch_size, _init_penality_reset_count,
                                  _init_save_id_greedy, _is_whisper):
         _start_indices = _start * _sample_rate
         _audio = _audio[..., int(_start_indices): int(_end * _sample_rate)]
@@ -1297,12 +1385,12 @@ def MAIN_PROCESS(
                 input_feed_G[in_name_G[3]] = _init_batch_size
             if DO_REPEAT_PENALITY:
                 if USE_BEAM_SEARCH:
-                    input_feed_J = {in_name_J[2]: _init_penality_reset_count_beam}
+                    input_feed_J = {in_name_J[2]: _init_penality_reset_count}
                 else:
-                    penality_reset_count_greedy = _init_penality_reset_count_beam
+                    penality_reset_count_greedy = _init_penality_reset_count
             num_decode = 0
             wave_form = onnxruntime.OrtValue.ortvalue_from_numpy(np.concatenate([pad_zeros, _audio[..., _slice_start: _slice_end], pad_zeros], axis=-1), device_type_C, DEVICE_ID)
-            all_outputs_C = ort_session_C._sess.run_with_ort_values({in_name_C0: wave_form._ortvalue}, out_name_C,run_options)
+            all_outputs_C = ort_session_C._sess.run_with_ort_values({in_name_C0: wave_form._ortvalue}, out_name_C, run_options)
             input_feed_D.update(zip(in_name_D[num_keys_values_plus_2: num_keys_values2_plus_2], all_outputs_C))
             while num_decode < generate_limit:
                 all_outputs_D = ort_session_D._sess.run_with_ort_values(input_feed_D, out_name_D, run_options)
@@ -1388,11 +1476,11 @@ def MAIN_PROCESS(
         return _start_indices * _inv_audio_len, saved_text + ';', (_start, _end)
 
     def inference_CD_dolphin(_max_asr_segment, _start, _end, _inv_audio_len, _audio, _sample_rate, _init_input_ids,
-                             _init_history_len, _init_ids_len, _init_ids_len_1, _init_ids_len_2, _init_ids_0,
+                             _init_history_len, _init_ids_len_1, _init_ids_len_2, _init_ids_0,
                              _init_ids_len_5, _init_ids_7, _init_ids_145, _init_ids_324, _init_ids_39999,
                              _init_ids_vocab_size, _init_attention_mask_D_0, _init_attention_mask_D_1,
                              _init_past_keys_D, _init_past_values_D, _init_save_id_beam, _init_repeat_penality,
-                             _init_batch_size, _init_penality_reset_count_beam, _init_save_id_greedy, _lang_id,
+                             _init_batch_size, _init_penality_reset_count, _init_save_id_greedy, _lang_id,
                              _region_id):
         start_indices = _start * _sample_rate
         _audio = _audio[..., int(start_indices): int(_end * _sample_rate)]
@@ -1455,9 +1543,9 @@ def MAIN_PROCESS(
                 input_feed_G[in_name_G[3]] = _init_batch_size
             if DO_REPEAT_PENALITY:
                 if USE_BEAM_SEARCH:
-                    input_feed_J = {in_name_J[2]: _init_penality_reset_count_beam}
+                    input_feed_J = {in_name_J[2]: _init_penality_reset_count}
                 else:
-                    penality_reset_count_greedy = _init_penality_reset_count_beam
+                    penality_reset_count_greedy = _init_penality_reset_count
             num_decode = 0
             while num_decode < generate_limit:
                 all_outputs_D = ort_session_D._sess.run_with_ort_values(input_feed_D, out_name_D, run_options)
@@ -1531,6 +1619,117 @@ def MAIN_PROCESS(
                 saved_text = saved_text.replace('▁', ' ')
         return start_indices * _inv_audio_len, saved_text + ';', (_start, _end)
 
+    def inference_CD_funasr_nano(_max_asr_segment, _start, _end, _inv_audio_len, _audio, _sample_rate,
+                                 _init_history_len, _init_ids_len_1, _init_attention_mask_D_0, _init_attention_mask_D_1,
+                                 _init_past_keys_D, _init_past_values_D, _init_save_id_beam, _init_repeat_penality, _init_batch_size, 
+                                 _init_penality_reset_count, _init_save_id_greedy, _transcribe_prompt, _init_prompt_embed):
+        _start_indices = _start * _sample_rate
+        _audio = _audio[..., int(_start_indices): int(_end * _sample_rate)]
+        audio_segment_len = _audio.shape[-1]
+        INPUT_AUDIO_LENGTH = min(_max_asr_segment, audio_segment_len)  # You can adjust it.
+        _stride_step = INPUT_AUDIO_LENGTH
+        _slice_start = 0
+        _slice_end = INPUT_AUDIO_LENGTH
+        saved_text = ''
+        while _slice_start < audio_segment_len:
+            wave_form = onnxruntime.OrtValue.ortvalue_from_numpy(np.concatenate([pad_zeros, _audio[..., _slice_start: _slice_end], pad_zeros], axis=-1), device_type_C, DEVICE_ID)
+            input_feed_C = {
+                in_name_C[0]: wave_form._ortvalue,
+                in_name_C[1]: _init_prompt_embed,
+            }
+            all_outputs_C = ort_session_C._sess.run_with_ort_values(input_feed_C, out_name_C, run_options)
+            input_feed_D = {
+                in_name_D[num_keys_values]: all_outputs_C[0],
+                in_name_D[num_keys_values_plus_1]: _init_history_len,
+                in_name_D[num_keys_values_plus_2]: all_outputs_C[1],
+                in_name_D[num_keys_values_plus_3]: _init_attention_mask_D_1,
+            }
+            for i in range(num_layers):
+                input_feed_D[in_name_D[i]] = _init_past_keys_D
+            for i in range(num_layers, num_keys_values):
+                input_feed_D[in_name_D[i]] = _init_past_values_D
+            if USE_BEAM_SEARCH:
+                input_feed_H[in_name_H[num_keys_values_plus_1]] = _init_save_id_beam
+                input_feed_H[in_name_H[num_keys_values_plus_2]] = _init_repeat_penality
+            else:
+                input_feed_G[in_name_G[1]] = _init_repeat_penality
+                input_feed_G[in_name_G[3]] = _init_batch_size
+            if DO_REPEAT_PENALITY:
+                if USE_BEAM_SEARCH:
+                    input_feed_J = {in_name_J[2]: _init_penality_reset_count}
+                else:
+                    penality_reset_count_greedy = _init_penality_reset_count
+            num_decode = 0
+            limit = generate_limit - all_outputs_C[1].numpy()
+            while num_decode < limit:
+                all_outputs_D = ort_session_D._sess.run_with_ort_values(input_feed_D, out_name_D, run_options)
+                if USE_BEAM_SEARCH:
+                    if num_decode < 1:
+                        input_feed_H.update(zip(in_name_H[:num_keys_values_plus_1], all_outputs_D))
+                        all_outputs_H = ort_session_H._sess.run_with_ort_values(input_feed_H, out_name_H, run_options)
+                        max_logits_idx = all_outputs_H[amount_of_outputs_H_minus_1].numpy()
+                        input_feed_I[in_name_I[-4]] = all_outputs_H[amount_of_outputs_H_minus_2]
+                        if DO_REPEAT_PENALITY:
+                            input_feed_J[in_name_J[3]] = all_outputs_H[amount_of_outputs_H_minus_2]
+                    else:
+                        input_feed_I.update(zip(in_name_I[:num_keys_values_plus_1], all_outputs_D))
+                        all_outputs_I = ort_session_I._sess.run_with_ort_values(input_feed_I, out_name_I, run_options)
+                        max_logits_idx = all_outputs_I[amount_of_outputs_I_minus_1].numpy()
+                    if max_logits_idx in ASR_STOP_TOKEN:
+                        break
+                    if DO_REPEAT_PENALITY and (num_decode >= PENALITY_RANGE):
+                        input_feed_J[in_name_J[0]] = all_outputs_I[num_keys_values_plus_1]
+                        input_feed_J[in_name_J[1]] = all_outputs_I[num_keys_values_plus_2]
+                        all_outputs_J = ort_session_J._sess.run_with_ort_values(input_feed_J, out_name_J, run_options)
+                        input_feed_J[in_name_J[2]] = all_outputs_J[2]
+                        input_feed_I[in_name_I[num_keys_values_plus_1]] = all_outputs_J[0]
+                        input_feed_I[in_name_I[num_keys_values_plus_2]] = all_outputs_J[1]
+                    if num_decode < 1:
+                        input_feed_D.update(zip(in_name_D[:num_keys_values], all_outputs_H))
+                        input_feed_K[in_name_K] = all_outputs_H[num_keys_values]
+                        input_feed_I[in_name_I[num_keys_values_plus_1]] = all_outputs_H[num_keys_values_plus_1]
+                        input_feed_I[in_name_I[num_keys_values_plus_2]] = all_outputs_H[num_keys_values_plus_2]
+                        input_feed_I[in_name_I[num_keys_values_plus_3]] = all_outputs_H[num_keys_values_plus_3]
+                    else:
+                        input_feed_D.update(zip(in_name_D[:num_keys_values], all_outputs_I))
+                        input_feed_K[in_name_K] = all_outputs_I[num_keys_values]
+                        input_feed_I[in_name_I[num_keys_values_plus_1]] = all_outputs_I[num_keys_values_plus_1]
+                        input_feed_I[in_name_I[num_keys_values_plus_2]] = all_outputs_I[num_keys_values_plus_2]
+                        input_feed_I[in_name_I[num_keys_values_plus_3]] = all_outputs_I[num_keys_values_plus_3]
+                else:
+                    input_feed_G[in_name_G[0]] = all_outputs_D[num_keys_values]
+                    all_outputs_G = ort_session_G._sess.run_with_ort_values(input_feed_G, out_name_G, run_options)
+                    max_logits_idx = all_outputs_G[0].numpy()[0, 0]
+                    if max_logits_idx in ASR_STOP_TOKEN:
+                        break
+                    if DO_REPEAT_PENALITY and (num_decode >= PENALITY_RANGE):
+                        reset_ids = _init_save_id_greedy[penality_reset_count_greedy]
+                        if reset_ids != max_logits_idx:
+                            repeat_penality = all_outputs_G[1].numpy()
+                            repeat_penality[..., reset_ids] = 1.0
+                            input_feed_G[in_name_G[1]].update_inplace(repeat_penality)
+                        penality_reset_count_greedy += 1
+                    else:
+                        input_feed_G[in_name_G[1]] = all_outputs_G[1]
+                    _init_save_id_greedy[num_decode] = max_logits_idx
+                    input_feed_K[in_name_K] = all_outputs_G[0]
+                    input_feed_D.update(zip(in_name_D[:num_keys_values], all_outputs_D))
+                input_feed_D[in_name_D[num_keys_values]] = ort_session_K._sess.run_with_ort_values(input_feed_K, out_name_K, run_options)[0]
+                input_feed_D[in_name_D[num_keys_values_plus_1]] = all_outputs_D[num_keys_values_plus_1]
+                if num_decode < 1:
+                    input_feed_D[in_name_D[num_keys_values_plus_2]] = _init_ids_len_1
+                    input_feed_D[in_name_D[num_keys_values_plus_3]] = _init_attention_mask_D_0
+                num_decode += 1
+            _slice_start += _stride_step
+            _slice_end = _slice_start + INPUT_AUDIO_LENGTH
+            if num_decode > 0:
+                if USE_BEAM_SEARCH:
+                    save_token_array = all_outputs_I[num_keys_values_plus_1].numpy()[0, :num_decode]
+                    saved_text += tokenizer.decode(save_token_array, skip_special_tokens=True)
+                else:
+                    saved_text += tokenizer.decode(_init_save_id_greedy[:num_decode], skip_special_tokens=True)
+        return _start_indices * _inv_audio_len, saved_text + ';', (_start, _end)
+
     def run_inference_x(func, args_list, progress_prefix='Progress'):
         results = []
         for args in args_list:
@@ -1566,7 +1765,9 @@ def MAIN_PROCESS(
     ort_session_K = None
 
     transcribe_language_dolphin = transcribe_language
-    transcribe_language = transcribe_language.split('-')[0].strip()
+    transcribe_language, transcribe_language_zh = transcribe_language.split('-')
+    transcribe_language = transcribe_language.strip()
+    transcribe_language_zh = transcribe_language_zh.strip()
     translate_language = translate_language.split('-')[0].strip()
 
     task_queue = []
@@ -2082,6 +2283,50 @@ def MAIN_PROCESS(
         asr_type = 4
         tokenizer = Dolphin_Tokenizer(r'./ASR/Dolphin/Small/Tokenizer/vocab_Dolphin.txt')
         vocab_size = tokenizer.num_vocab
+    elif 'FunASR-Nano' in model_asr:
+        if "MLT" in model_asr:
+            path = r'./ASR/FunASR_Nano_MLT/FP32/'
+        else:
+            path = r'./ASR/FunASR_Nano/FP32/'
+        onnx_model_C = path + 'FunASR_Nano_Encoder.onnx'
+        onnx_model_D = path + 'FunASR_Nano_Decoder_Main.onnx'
+        onnx_model_K = path + 'FunASR_Nano_Decoder_Embed.onnx'
+        onnx_model_G = path + 'Greedy_Search.onnx'
+        onnx_model_H = path + 'First_Beam_Search.onnx'
+        onnx_model_I = path + 'Second_Beam_Search.onnx'
+        onnx_model_J = path + 'Reset_Penality.onnx'
+        if (
+                os.path.isfile(onnx_model_C) and
+                os.path.isfile(onnx_model_D) and
+                os.path.isfile(onnx_model_G) and
+                os.path.isfile(onnx_model_H) and
+                os.path.isfile(onnx_model_I) and
+                os.path.isfile(onnx_model_J) and
+                os.path.isfile(onnx_model_K)
+        ):
+            print(f'\n找到了 ASR。Found the {model_asr}.')
+            if 'MLT' in model_asr:
+                tokenizer = AutoTokenizer.from_pretrained(r'./ASR/FunASR_Nano_MLT/Tokenizer')
+                hot_word_path = r'./ASR/FunASR_Nano_MLT/Hot_Words.txt'
+            else:
+                tokenizer = AutoTokenizer.from_pretrained('./ASR/FunASR_Nano/Tokenizer')
+                hot_word_path = r'./ASR/FunASR_Nano/Hot_Words.txt'
+            hot_words = []
+            print(f'\n读取热词表。Read the hot word list.')
+            with open(hot_word_path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    content = line.split('#')[0].strip()
+                    if content:
+                        hot_words.append(content)
+            if hot_words:
+                hot_words = f"[{', '.join(hot_words)}]"
+            else:
+                hot_words = ''
+        else:
+            error = f"\n未找到模型。The {model_asr} doesn't exist."
+            print(error)
+            return error
+        asr_type = 5
     else:
         error = f"\n未找到模型。The {model_asr} doesn't exist."
         print(error)
@@ -2090,13 +2335,13 @@ def MAIN_PROCESS(
     # ONNX Runtime settings
     session_opts = onnxruntime.SessionOptions()
     run_options = onnxruntime.RunOptions()
-    session_opts.log_severity_level = 4   # Fatal level, it an adjustable value.
-    session_opts.log_verbosity_level = 4  # Fatal level, it an adjustable value.
-    run_options.log_severity_level = 4    # Fatal level, it an adjustable value.
-    run_options.log_verbosity_level = 4   # Fatal level, it an adjustable value.
-    session_opts.inter_op_num_threads = parallel_threads  # Run different nodes with num_threads. Set 0 for auto.
-    session_opts.intra_op_num_threads = parallel_threads  # Under the node, execute the operators with num_threads. Set 0 for auto.
-    session_opts.enable_cpu_mem_arena = True  # True for execute speed; False for less memory usage.
+    session_opts.log_severity_level = 4                     # Fatal level, it an adjustable value.
+    session_opts.log_verbosity_level = 4                    # Fatal level, it an adjustable value.
+    run_options.log_severity_level = 4                      # Fatal level, it an adjustable value.
+    run_options.log_verbosity_level = 4                     # Fatal level, it an adjustable value.
+    session_opts.inter_op_num_threads = parallel_threads    # Run different nodes with num_threads. Set 0 for auto.
+    session_opts.intra_op_num_threads = parallel_threads    # Under the node, execute the operators with num_threads. Set 0 for auto.
+    session_opts.enable_cpu_mem_arena = True                # True for execute speed; False for less memory usage.
     session_opts.execution_mode = onnxruntime.ExecutionMode.ORT_SEQUENTIAL
     session_opts.graph_optimization_level = onnxruntime.GraphOptimizationLevel.ORT_ENABLE_ALL
     session_opts.add_session_config_entry('session.set_denormal_as_zero', '1')
@@ -2104,13 +2349,13 @@ def MAIN_PROCESS(
     session_opts.add_session_config_entry('session.inter_op.allow_spinning', '1')
     session_opts.add_session_config_entry('session.enable_quant_qdq_cleanup', '1')
     session_opts.add_session_config_entry('session.qdq_matmulnbits_accuracy_level', '4')
+    session_opts.add_session_config_entry('session.use_device_allocator_for_initializers', '1')
+    session_opts.add_session_config_entry('session.graph_optimizations_loop_level', '2')
     session_opts.add_session_config_entry('optimization.enable_gelu_approximation', '1')
     session_opts.add_session_config_entry('optimization.minimal_build_optimizations', '')
-    session_opts.add_session_config_entry('session.use_device_allocator_for_initializers', '1')
     session_opts.add_session_config_entry('optimization.enable_cast_chain_elimination', '1')
-    session_opts.add_session_config_entry('session.graph_optimizations_loop_level', '2')
-
     run_options.add_run_config_entry('disable_synchronize_execution_providers', '1')
+
     if 'QNNExecutionProvider' in ORT_Accelerate_Providers[0]:
         run_options.add_run_config_entry('qnn.htp_perf_mode', 'burst')
         run_options.add_run_config_entry('qnn.htp_perf_mode_post_run', 'burst')
@@ -2126,9 +2371,7 @@ def MAIN_PROCESS(
         from faster_whisper.vad import get_speech_timestamps as get_speech_timestamps_FW, VadOptions
         slider_vad_MIN_SPEECH_DURATION_ms = int(slider_vad_MIN_SPEECH_DURATION * 1000)
     elif vad_type == 2:
-        import torch
         from silero_vad import load_silero_vad, get_speech_timestamps
-        torch.set_num_threads(parallel_threads)
         silero_vad = load_silero_vad(onnx=True)
         slider_vad_MIN_SPEECH_DURATION_ms = int(slider_vad_MIN_SPEECH_DURATION * 1000)
         print("\nVAD 可用的硬件 VAD Usable Providers: ['CPUExecutionProvider']")
@@ -2279,9 +2522,9 @@ def MAIN_PROCESS(
         if USE_BEAM_SEARCH:
             init_save_id_greedy = None
             penality_reset_count_beam = onnxruntime.OrtValue.ortvalue_from_numpy(np.zeros(slide_beam_size_asr, dtype=np.int32), device_type_C, DEVICE_ID)
-            init_penality_reset_count_beam = penality_reset_count_beam._ortvalue
+            init_penality_reset_count = penality_reset_count_beam._ortvalue
         else:
-            init_penality_reset_count_beam = 0
+            init_penality_reset_count = 0
             init_save_id_greedy = np.zeros(MAX_SEQ_LEN_ASR, dtype=np.int32)
         if asr_type != 0 or device_type_C != 'cpu':
             if device_type_C != 'dml':
@@ -2304,6 +2547,140 @@ def MAIN_PROCESS(
         init_ids_len = ids_len._ortvalue
         init_ids_len_1 = ids_len_1._ortvalue
         init_input_ids = input_ids._ortvalue
+        init_repeat_penality = repeat_penality._ortvalue
+        init_penality_value = penality_value._ortvalue
+        init_past_keys_D = past_keys_D._ortvalue
+        init_past_values_D = past_values_D._ortvalue
+        init_batch_size = batch_size._ortvalue
+        if USE_BEAM_SEARCH:
+            topK = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([slide_top_k_asr], dtype=np.int64), device_type_C, DEVICE_ID)
+            save_id_beam = onnxruntime.OrtValue.ortvalue_from_numpy(np.zeros((slide_beam_size_asr, 0), dtype=np.int32), device_type_C, DEVICE_ID)
+            beam_size = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([slide_beam_size_asr], dtype=np.int64), device_type_C, DEVICE_ID)
+            init_topK = topK._ortvalue
+            init_save_id_beam = save_id_beam._ortvalue
+            init_beam_size = beam_size._ortvalue
+            ort_session_H = onnxruntime.InferenceSession(onnx_model_H, sess_options=session_opts, providers=ORT_Accelerate_Providers_C, provider_options=provider_options_C)
+            in_name_H = ort_session_H.get_inputs()
+            out_name_H = ort_session_H.get_outputs()
+            amount_of_outputs_H = len(out_name_H)
+            amount_of_outputs_H_minus_1 = amount_of_outputs_H - 1
+            amount_of_outputs_H_minus_2 = amount_of_outputs_H - 2
+            in_name_H = [in_name_H[i].name for i in range(len(in_name_H))]
+            out_name_H = [out_name_H[i].name for i in range(amount_of_outputs_H)]
+            ort_session_I = onnxruntime.InferenceSession(onnx_model_I, sess_options=session_opts, providers=ORT_Accelerate_Providers_C, provider_options=provider_options_C)
+            in_name_I = ort_session_I.get_inputs()
+            out_name_I = ort_session_I.get_outputs()
+            amount_of_outputs_I = len(out_name_I)
+            amount_of_outputs_I_minus_1 = amount_of_outputs_I - 1
+            in_name_I = [in_name_I[i].name for i in range(len(in_name_I))]
+            out_name_I = [out_name_I[i].name for i in range(amount_of_outputs_I)]
+            ort_session_J = onnxruntime.InferenceSession(onnx_model_J, sess_options=session_opts, providers=ORT_Accelerate_Providers_C, provider_options=provider_options_C)
+            in_name_J = ort_session_J.get_inputs()
+            out_name_J = ort_session_J.get_outputs()
+            in_name_J = [in_name_J[i].name for i in range(len(in_name_J))]
+            out_name_J = [out_name_J[i].name for i in range(len(out_name_J))]
+            input_feed_H = {
+                in_name_H[-2]: init_penality_value,
+                in_name_H[-1]: init_beam_size
+            }
+            input_feed_I = {
+                in_name_I[-3]: init_penality_value,
+                in_name_I[-2]: init_beam_size,
+                in_name_I[-1]: init_topK
+            }
+        else:
+            init_topK = None
+            init_save_id_beam = None
+            init_beam_size = None
+            ort_session_G = onnxruntime.InferenceSession(onnx_model_G, sess_options=session_opts, providers=ORT_Accelerate_Providers_C, provider_options=provider_options_C)
+            in_name_G = ort_session_G.get_inputs()
+            out_name_G = ort_session_G.get_outputs()
+            in_name_G = [in_name_G[i].name for i in range(len(in_name_G))]
+            out_name_G = [out_name_G[i].name for i in range(len(out_name_G))]
+            input_feed_G = {in_name_G[2]: init_penality_value}
+    elif asr_type == 5:
+        ASR_STOP_TOKEN = [151643, 151645]
+        generate_limit = MAX_SEQ_LEN_FUNASR_NANO - 20
+        if slide_top_k_asr < slide_beam_size_asr:
+            slide_top_k_asr = slide_beam_size_asr
+        if (slide_top_k_asr < 2) or (slide_beam_size_asr < 2):
+            USE_BEAM_SEARCH = False
+            print('\n使用贪心搜索。Using Greedy Search.')
+        else:
+            USE_BEAM_SEARCH = True
+            print('\n使用线束搜索。Using Beam Search.')
+        ort_session_D = onnxruntime.InferenceSession(onnx_model_D, sess_options=session_opts, providers=ORT_Accelerate_Providers_C, provider_options=provider_options_C)
+        ort_session_K = onnxruntime.InferenceSession(onnx_model_K, sess_options=session_opts, providers=ORT_Accelerate_Providers_C, provider_options=provider_options_C)
+        in_name_C = ort_session_C.get_inputs()
+        out_name_C = ort_session_C.get_outputs()                                                                                                                                                         
+        in_name_C = [in_name_C[i].name for i in range(len(in_name_C))]
+        out_name_C = [out_name_C[i].name for i in range(len(out_name_C))]
+        model_D_dtype = ort_session_D._inputs_meta[0].type
+        if 'float16' in model_D_dtype:
+            model_D_dtype = np.float16
+        else:
+            model_D_dtype = np.float32
+        in_name_D = ort_session_D.get_inputs()
+        out_name_D = ort_session_D.get_outputs()
+        amount_of_outputs_D = len(out_name_D)
+        in_name_D = [in_name_D[i].name for i in range(len(in_name_D))]
+        out_name_D = [out_name_D[i].name for i in range(amount_of_outputs_D)]
+        in_name_K = ort_session_K.get_inputs()
+        out_name_K = ort_session_K.get_outputs()
+        in_name_K = in_name_K[0].name
+        out_name_K = [out_name_K[0].name]
+        if hot_words is not None and hot_words != '':
+            hot_words_prompt = f'\n\n热词表：{hot_words}'
+        else:
+            hot_words_prompt = ''
+        if '自动' in transcribe_language_zh:
+            transcribe_prompt = '\n\n转写这段语音：'
+        elif '中文' in transcribe_language_zh:
+            region = transcribe_language_zh.split('_')[-1]
+            transcribe_prompt = f'\n\n将这段{region}语音转写成中文：'
+        else:
+            transcribe_prompt = f'\n\n转写这段{transcribe_language_zh}语音：'
+        transcribe_prompt = f'请结合上下文信息与热词表，准确地完成语音转写任务。{hot_words_prompt}{transcribe_prompt}'
+        tokens = tokenizer(transcribe_prompt, return_tensors='np')['input_ids'].astype(np.int32)
+        input_ids = onnxruntime.OrtValue.ortvalue_from_numpy(tokens, device_type, DEVICE_ID)
+        input_feed_K = {in_name_K: input_ids}
+        prompt_embed = ort_session_K.run_with_ort_values(out_name_K, input_feed_K)[0]
+        num_layers = (amount_of_outputs_D - 2) // 2
+        num_keys_values = num_layers + num_layers
+        num_keys_values_plus_1 = num_keys_values + 1
+        num_keys_values_plus_2 = num_keys_values + 2
+        num_keys_values_plus_3 = num_keys_values + 3
+        vocab_size = ort_session_D._outputs_meta[num_keys_values].shape[1]
+        attention_mask_D_0 = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([0], dtype=np.int8), device_type_C, DEVICE_ID)
+        attention_mask_D_1 = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([1], dtype=np.int8), device_type_C, DEVICE_ID)
+        history_len = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([0], dtype=np.int64), device_type_C, DEVICE_ID)
+        ids_len_1 = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([1], dtype=np.int64), device_type_C, DEVICE_ID)
+        repeat_penality = onnxruntime.OrtValue.ortvalue_from_numpy(np.ones((slide_beam_size_asr, vocab_size), dtype=model_D_dtype), device_type_C, DEVICE_ID)
+        penality_value = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([slide_repeat_penality_value_asr], dtype=model_D_dtype), device_type_C, DEVICE_ID)
+        if slide_repeat_penality_value_asr != 1.0:
+            DO_REPEAT_PENALITY = True
+        else:
+            DO_REPEAT_PENALITY = False
+        if USE_BEAM_SEARCH:
+            init_save_id_greedy = None
+            penality_reset_count_beam = onnxruntime.OrtValue.ortvalue_from_numpy(np.zeros(slide_beam_size_asr, dtype=np.int32), device_type_C, DEVICE_ID)
+            init_penality_reset_count = penality_reset_count_beam._ortvalue
+        else:
+            init_penality_reset_count = 0
+            init_save_id_greedy = np.zeros(MAX_SEQ_LEN_FUNASR_NANO, dtype=np.int32)
+
+        if device_type_C != 'dml':
+            past_keys_D = onnxruntime.OrtValue.ortvalue_from_numpy(np.zeros((1, ort_session_D._outputs_meta[0].shape[1], 1, ort_session_D._outputs_meta[0].shape[3], 0), dtype=model_D_dtype), device_type_C, DEVICE_ID)
+            past_values_D = onnxruntime.OrtValue.ortvalue_from_numpy(np.zeros((1, ort_session_D._outputs_meta[num_layers].shape[1], 1, 0, ort_session_D._outputs_meta[num_layers].shape[4]), dtype=model_D_dtype), device_type_C, DEVICE_ID)
+        else:
+            past_keys_D = onnxruntime.OrtValue.ortvalue_from_numpy(np.zeros((1, ort_session_D._outputs_meta[0].shape[1], 1, ort_session_D._outputs_meta[0].shape[3], 0), dtype=model_D_dtype), 'cpu', DEVICE_ID)
+            past_values_D = onnxruntime.OrtValue.ortvalue_from_numpy(np.zeros((1, ort_session_D._outputs_meta[num_layers].shape[1], 1, 0, ort_session_D._outputs_meta[num_layers].shape[4]), dtype=model_D_dtype), 'cpu', DEVICE_ID)
+        batch_size = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([1], dtype=np.int64), device_type_C, DEVICE_ID)
+        init_prompt_embed = prompt_embed._ortvalue
+        init_attention_mask_D_0 = attention_mask_D_0._ortvalue
+        init_attention_mask_D_1 = attention_mask_D_1._ortvalue
+        init_history_len = history_len._ortvalue
+        init_ids_len_1 = ids_len_1._ortvalue
         init_repeat_penality = repeat_penality._ortvalue
         init_penality_value = penality_value._ortvalue
         init_past_keys_D = past_keys_D._ortvalue
@@ -2392,7 +2769,7 @@ def MAIN_PROCESS(
                     audio_len = len(audio) // 3
                     audio_len_3 = audio_len + audio_len + audio_len
                     audio = np.mean(audio[:audio_len_3].reshape(-1, 3), axis=-1, dtype=np.float32)
-                audio = normalize_to_int16(audio).astype(np.float32)
+                audio = normalizer(audio, use_float32=True)
                 de_audio = np.array(AudioSegment.from_file(f'./Cache/{file_name}_{model_denoiser}.wav').set_channels(1).set_frame_rate(SAMPLE_RATE_16K).get_array_of_samples(), dtype=np.float32)
                 min_len = min(audio.shape[-1], de_audio.shape[-1])
                 audio = audio[:min_len] * slider_denoise_factor_minus + de_audio[:min_len] * slider_denoise_factor
@@ -2538,15 +2915,14 @@ def MAIN_PROCESS(
 
         if FIRST_RUN:
             print(f'\n所有模型已成功加载。All Models have been successfully loaded.')
-            print(
-                '----------------------------------------------------------------------------------------------------------')
+            print('----------------------------------------------------------------------------------------------------------')
 
         # Process audio
         audio_len = audio.shape[-1]
         if switcher_run_test:
             audio_len = audio_len // 10
             audio = audio[:audio_len]
-        audio = normalize_to_int16(audio)
+        audio = normalizer(audio)
         audio = audio.reshape(1, 1, -1)
         inv_audio_len = 100.0 / audio_len
         if USE_DENOISED:
@@ -2590,7 +2966,7 @@ def MAIN_PROCESS(
             audio_len_3 = audio_len + audio_len + audio_len
             audio = np.mean(audio[..., :audio_len_3].reshape(-1, 3), axis=-1, dtype=np.float32)
             audio = audio * slider_denoise_factor_minus + de_audio.astype(np.float32) * slider_denoise_factor
-            audio = normalize_to_int16(audio.clip(min=-32768.0, max=32767.0))
+            audio = normalizer(audio.clip(min=-32768.0, max=32767.0))
             sf.write(f'./Cache/{file_name}_{model_denoiser}.wav', de_audio.reshape(-1), SAMPLE_RATE_16K, format='WAVEX')
             print(f'Denoising: 100.00%\n降噪完成。Complete.\nTime Cost: {(end_time - start_time):.3f} Seconds.')
             del saved
@@ -2600,14 +2976,13 @@ def MAIN_PROCESS(
             gc.collect()
 
         # VAD parts.
-        print(
-            '----------------------------------------------------------------------------------------------------------')
+        print('----------------------------------------------------------------------------------------------------------')
         print('\n接下来利用VAD模型提取语音片段。Next, use the VAD model to extract speech segments.')
         start_time = time.time()
         if vad_type != -1:
             if USE_DENOISED or HAS_CACHE:
                 waveform = np.array(AudioSegment.from_file(f'./Cache/{file_name}_{model_denoiser}.wav').set_channels(1).set_frame_rate(SAMPLE_RATE_16K).get_array_of_samples(), dtype=np.float32)
-                waveform = normalize_to_int16(waveform)
+                waveform = normalizer(waveform)
                 waveform = waveform.reshape(1, 1, -1)
             else:
                 waveform = audio
@@ -2628,20 +3003,19 @@ def MAIN_PROCESS(
         elif vad_type == 2:
             print(
                 '\nVAD-Official-Silero 不提供可视化的运行进度。\nThe VAD-Official-Silero does not provide the running progress for visualization.\n')
-            with torch.inference_mode():
-                timestamps = get_speech_timestamps(
-                    torch.from_numpy(waveform.reshape(-1).astype(np.float32) * inv_16k),
-                    model=silero_vad,
-                    threshold=slider_vad_SPEAKING_SCORE,
-                    neg_threshold=slider_vad_SILENCE_SCORE,
-                    max_speech_duration_s=slider_vad_MAX_SPEECH_DURATION,
-                    min_speech_duration_ms=slider_vad_MIN_SPEECH_DURATION_ms,
-                    min_silence_duration_ms=slider_vad_MIN_SILENCE_DURATION,
-                    speech_pad_ms=slider_vad_pad,
-                    return_seconds=True
-                )
-                timestamps = [(item['start'], item['end']) for item in timestamps]
-                del waveform
+            timestamps = get_speech_timestamps(
+                waveform.reshape(-1).astype(np.float32) * inv_16k,
+                model=silero_vad,
+                threshold=slider_vad_SPEAKING_SCORE,
+                neg_threshold=slider_vad_SILENCE_SCORE,
+                max_speech_duration_s=slider_vad_MAX_SPEECH_DURATION,
+                min_speech_duration_ms=slider_vad_MIN_SPEECH_DURATION_ms,
+                min_silence_duration_ms=slider_vad_MIN_SILENCE_DURATION,
+                speech_pad_ms=slider_vad_pad,
+                return_seconds=True
+            )
+            timestamps = [(item['start'], item['end']) for item in timestamps]
+            del waveform
         elif vad_type == 3:
             print(
                 '\nVAD-Pyannote_Segmentation 不提供可视化的运行进度。\nThe VAD-Pyannote_Segmentation does not provide the running progress for visualization.\n')
@@ -2682,36 +3056,50 @@ def MAIN_PROCESS(
                     del white_noise
                 silence = True
                 saved = []
+                scores = []
                 for i in range(0, waveform_len, INPUT_AUDIO_LENGTH_B):
-                    score = humaware_vad(waveform[i: i + INPUT_AUDIO_LENGTH_B], SAMPLE_RATE_16K)
+                    scores.append(humaware_vad(waveform[i: i + INPUT_AUDIO_LENGTH_B], SAMPLE_RATE_16K))
+                scores = np.array(scores, dtype=np.float32).flatten()
+                score_len = scores.shape[-1]
+                window_size = 20
+                threshold = 0.8
+                for i in range(score_len):
+                    end_idx = min(i + window_size, score_len)
+                    window = scores[i:end_idx]
                     if silence:
-                        if score >= slider_vad_SPEAKING_SCORE:
-                            silence = False
+                        meets_threshold = (window >= slider_vad_SPEAKING_SCORE).sum() >= threshold * len(window)
+                        silence = not meets_threshold
                     else:
-                        if score <= slider_vad_SILENCE_SCORE:
-                            silence = True
+                        meets_threshold = (window <= slider_vad_SPEAKING_SCORE).sum() >= threshold * len(window)
+                        silence = meets_threshold
                     saved.append(silence)
                 timestamps = vad_to_timestamps(saved, HumAware_param)
                 del saved
                 del waveform
+                del scores
                 gc.collect()
         elif vad_type == 5:
             print(
                 '\nVAD-NVIDIA_Frame_VAD_Multilingual_MarbleNet 不提供可视化的运行进度。\nThe VAD-NVIDIA_Frame_VAD_Multilingual_MarbleNet does not provide the running progress for visualization.\n')
             waveform = onnxruntime.OrtValue.ortvalue_from_numpy(waveform, device_type_B, DEVICE_ID)
             all_outpus_B = ort_session_B._sess.run_with_ort_values({in_name_B0: waveform._ortvalue}, out_name_B, run_options)
-            score_silence = all_outpus_B[0].numpy()
-            score_active = all_outpus_B[1].numpy()
-            signal_len = all_outpus_B[2].numpy()
+            score_silence = all_outpus_B[0].numpy().flatten()
+            score_active = all_outpus_B[1].numpy().flatten()
+            signal_len = all_outpus_B[2].numpy()[0]
             silence = True
             saved = []
-            for i in range(signal_len[0]):
+            window_size = 20
+            threshold = 0.65
+            for i in range(signal_len):
+                end_idx = min(i + window_size, signal_len)
                 if silence:
-                    if score_active[:, i] >= slider_vad_SPEAKING_SCORE:
-                        silence = False
+                    window = score_active[i:end_idx]
+                    meets_threshold = (window >= slider_vad_SPEAKING_SCORE).sum() >= threshold * len(window)
+                    silence = not meets_threshold
                 else:
-                    if score_silence[:, i] >= slider_vad_SILENCE_SCORE:
-                        silence = True
+                    window = score_silence[i:end_idx]
+                    meets_threshold = (window >= slider_vad_SILENCE_SCORE).sum() >= threshold * len(window)
+                    silence = meets_threshold
                 saved.append(silence)
             timestamps = vad_to_timestamps(saved, NVIDIA_VAD_param)
             del saved
@@ -2746,26 +3134,36 @@ def MAIN_PROCESS(
             inv_audio_len = 100.0 / audio_len
             silence = True
             saved = []
+            scores = []
             slice_start = 0
             slice_end = INPUT_AUDIO_LENGTH_B
             while slice_end <= audio_len:
                 score, _ = ten_vad.process(waveform[slice_start: slice_end])
-                if silence:
-                    if score >= slider_vad_SPEAKING_SCORE:
-                        silence = False
-                else:
-                    if score <= slider_vad_SILENCE_SCORE:
-                        silence = True
-                saved.append(silence)
+                scores.append(score)
                 print(f'VAD: {slice_start * inv_audio_len:.3f}%')
                 slice_start += stride_step_B
                 slice_end = slice_start + INPUT_AUDIO_LENGTH_B
+            scores = np.array(scores, dtype=np.float32).flatten()
+            score_len = scores.shape[-1]
+            window_size = 20
+            threshold = 0.8
+            for i in range(score_len):
+                end_idx = min(i + window_size, score_len)
+                window = scores[i:end_idx]
+                if silence:
+                    meets_threshold = (window >= slider_vad_SPEAKING_SCORE).sum() >= threshold * len(window)
+                    silence = not meets_threshold
+                else:
+                    meets_threshold = (window <= slider_vad_SPEAKING_SCORE).sum() >= threshold * len(window)
+                    silence = meets_threshold
+                saved.append(silence)
             timestamps = vad_to_timestamps(saved, TEN_VAD_param)
             del waveform
             del silence
             del saved
             del slice_start
             del slice_end
+            del scores
         else:
             print('\n这个任务不使用 VAD。This task does not use VAD.\n')
         if vad_type != -1:
@@ -2773,8 +3171,7 @@ def MAIN_PROCESS(
             print(f'VAD: 100.00%\n完成提取语音片段。Complete.\nTime Cost: {(time.time() - start_time):.3f} Seconds.')
         else:
             timestamps = [(0.0, audio_len * inv_16k)]
-        print(
-            '----------------------------------------------------------------------------------------------------------')
+        print('----------------------------------------------------------------------------------------------------------')
 
         # -------------------------
         # ASR (transcription)
@@ -2787,7 +3184,7 @@ def MAIN_PROCESS(
                 (max_asr_segment, start, end, inv_audio_len, audio, SAMPLE_RATE_16K, init_input_ids, init_history_len,
                  init_ids_len, init_ids_len_1, init_attention_mask_D_0, init_attention_mask_D_1, init_past_keys_D,
                  init_past_values_D, init_save_id_beam, init_repeat_penality, init_batch_size,
-                 init_penality_reset_count_beam, init_save_id_greedy, True) for start, end in timestamps]
+                 init_penality_reset_count, init_save_id_greedy, True) for start, end in timestamps]
             results = run_inference_x(inference_CD_beam_search, args_list, progress_prefix='ASR')
         elif asr_type == 1:
             args_list = [(max_asr_segment, start, end, inv_audio_len, audio, SAMPLE_RATE_16K, language_idx) for start, end in timestamps]
@@ -2800,7 +3197,7 @@ def MAIN_PROCESS(
                 (max_asr_segment, start, end, inv_audio_len, audio, SAMPLE_RATE_16K, init_input_ids, init_history_len,
                  init_ids_len, init_ids_len_1, init_attention_mask_D_0, init_attention_mask_D_1, init_past_keys_D,
                  init_past_values_D, init_save_id_beam, init_repeat_penality, init_batch_size,
-                 init_penality_reset_count_beam, init_save_id_greedy, False) for start, end in timestamps]
+                 init_penality_reset_count, init_save_id_greedy, False) for start, end in timestamps]
             results = run_inference_x(inference_CD_beam_search, args_list, progress_prefix='ASR')
         elif asr_type == 4:
             args_list = [
@@ -2808,8 +3205,15 @@ def MAIN_PROCESS(
                  init_ids_len, init_ids_len_1, init_ids_len_2, init_ids_0, init_ids_len_5, init_ids_7, init_ids_145,
                  init_ids_324, init_ids_39999, init_ids_vocab_size, init_attention_mask_D_0, init_attention_mask_D_1,
                  init_past_keys_D, init_past_values_D, init_save_id_beam, init_repeat_penality, init_batch_size,
-                 init_penality_reset_count_beam, init_save_id_greedy, lang_id, region_id) for start, end in timestamps]
+                 init_penality_reset_count, init_save_id_greedy, lang_id, region_id) for start, end in timestamps]
             results = run_inference_x(inference_CD_dolphin, args_list, progress_prefix='ASR')
+        elif asr_type == 5:
+            args_list = [
+                (max_asr_segment, start, end, inv_audio_len, audio, SAMPLE_RATE_16K, init_history_len,
+                 init_ids_len_1, init_attention_mask_D_0, init_attention_mask_D_1, init_past_keys_D,
+                 init_past_values_D, init_save_id_beam, init_repeat_penality, init_batch_size,
+                 init_penality_reset_count, init_save_id_greedy, transcribe_prompt, init_prompt_embed) for start, end in timestamps]
+            results = run_inference_x(inference_CD_funasr_nano, args_list, progress_prefix='ASR')
         else:
             results = []
         save_text = [result[1] for result in results]
@@ -2940,6 +3344,7 @@ def MAIN_PROCESS(
                     MAX_TRANSLATE_LINES = 4
                     TRANSLATE_OVERLAP = 1
                 MAX_TOKENS_PER_CHUNK = MAX_TRANSLATE_LINES * MAX_SEQ_LEN_LLM
+                save_id_llm = np.ones(MAX_TOKENS_PER_CHUNK, dtype=np.int32)
 
                 is_seed_x = False
                 if 'Qwen' in model_llm:
@@ -3065,20 +3470,20 @@ def MAIN_PROCESS(
                         ort_session_E._sess.run_with_iobinding(io_binding_E, run_options)
                     all_outputs_E = io_binding_E.get_outputs()
                     max_logit_ids = all_outputs_E[num_keys_values].numpy()[0, 0]
-                    num_decode += 1
                     if max_logit_ids in LLM_STOP_TOKEN:
                         break
-                    if num_decode < 2:
+                    if num_decode < 1:
                         io_binding_E.bind_ortvalue_input(in_name_E[-1], init_attention_mask_E_0_ort)
                         io_binding_E.bind_ortvalue_input(in_name_E[-2], init_ids_len_1_ort)
+                    save_id_llm[num_decode] = max_logit_ids
+                    num_decode += 1
                     bind_inputs_to_device(io_binding_E, in_name_E, all_outputs_E, amount_of_outputs_E)
-                    text = tokenizer_llm.decode(max_logit_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)
-                    save_text += text
+                if num_decode > 0:
+                    save_text = tokenizer_llm.decode(save_id_llm[:num_decode], skip_special_tokens=True, clean_up_tokenization_spaces=False)
                     if is_seed_x:
-                        if '[COT]' in save_text:
-                            save_text.replace('[COT]', '')
-                            break
-                    print(text, end='', flush=True)
+                        save_text.replace('[COT]', '')
+                        break
+                    print(save_text, end='', flush=True)
                 print(f'\n\nDecode: {(num_decode / (time.time() - start_time)):.3f} token/s')
                 translated_responses.append(save_text)
                 print(f'Translating: - {chunk_end * inv_total_lines:.3f}%')
@@ -3093,16 +3498,13 @@ def MAIN_PROCESS(
                 for i in range(len(merged_responses)):
                     response_line = merged_responses[i]
                     if response_line:
-                        if is_seed_x:
-                            dot_split = False
-                            for j in range(10):
-                                if f'{j}. ' in response_line[:4]:
-                                    dot_split = True
-                                    break
-                            if dot_split:
-                                parts = response_line.split('. ')
-                            else:
-                                parts = response_line.split('-')
+                        dot_split = False
+                        for j in range(10):
+                            if f'{j}. ' in response_line[:4]:
+                                dot_split = True
+                                break
+                        if dot_split:
+                            parts = response_line.split('. ')
                         else:
                             parts = response_line.split('-')
                         if len(parts) > 1:
@@ -3399,12 +3801,12 @@ def create_interface():
             )
 
             slide_repeat_penality_value_asr = gr.Slider(
-                minimum=0.7,
+                minimum=0.6,
                 maximum=1.0,
                 step=0.025,
                 label='ASR重复处罚 / ASR Repeat Penalty',
                 info='防止重复输出解码，设定1则无处罚。\nPrevent duplicate decoding. Setting 1 is disable.',
-                value=0.95,
+                value=0.9,
                 visible=False,
                 interactive=True
             )
@@ -3630,7 +4032,7 @@ def create_interface():
         model_asr.change(
             fn=update_transcribe_language,
             inputs=model_asr,
-            outputs=[transcribe_language, slide_top_k_asr, slide_beam_size_asr, slide_repeat_penality_value_asr]
+            outputs=[transcribe_language, slide_top_k_asr, slide_beam_size_asr, slide_repeat_penality_value_asr, slider_denoise_factor]
         )
 
         model_denoiser.change(
