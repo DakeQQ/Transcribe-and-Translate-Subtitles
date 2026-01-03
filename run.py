@@ -1607,8 +1607,7 @@ def MAIN_PROCESS(
     if len(usable_providers) > 1:
         if hardware != "CPU":
             model_dtype = "FP16"
-            has_npu = (('OpenVINOExecutionProvider' in usable_providers) and has_npu) or (
-                        'VitisAIExecutionProvider' in usable_providers) or ('QNNExecutionProvider' in usable_providers)
+            has_npu = (('OpenVINOExecutionProvider' in usable_providers) and has_npu) or ('VitisAIExecutionProvider' in usable_providers) or ('QNNExecutionProvider' in usable_providers)
             cuda_options = {
                 'device_id': DEVICE_ID,
                 'gpu_mem_limit': 64 * 1073741824,  # 64 GB
@@ -1618,11 +1617,11 @@ def MAIN_PROCESS(
                 'use_tf32': '1',
                 'fuse_conv_bias': '0',
                 'cudnn_conv_use_max_workspace': '1',
-                'cudnn_conv1d_pad_to_nc1d': '1',
+                'cudnn_conv1d_pad_to_nc1d': '0',
                 'tunable_op_enable': '0',
                 'tunable_op_tuning_enable': '0',
                 'tunable_op_max_tuning_duration_ms': 1000,
-                'do_copy_in_default_stream': '1',
+                'do_copy_in_default_stream': '0',
                 'enable_cuda_graph': '0',  # Set to '0' to avoid potential errors when enabled.
                 'prefer_nhwc': '0',
                 'enable_skip_layer_norm_strict_mode': '0',
@@ -1753,7 +1752,8 @@ def MAIN_PROCESS(
             'trt_sparsity_enable': False,                # True for performance but loss accuracy
             'trt_engine_hw_compatible': False,           # True for Ampere+ hardware compatibility (if compiled model share using). False for better performance on fixed device.
             'trt_cuda_graph_enable': False,
-            'trt_fp16_enable': True,
+            'trt_bf16_enable': True,
+            'trt_fp16_enable': False,
             'trt_int8_enable': False,
             'trt_max_partition_iterations': 1000,
             'trt_min_subgraph_size': 1,
@@ -3285,6 +3285,7 @@ def create_interface():
                     r'./Icon/psyduck.jpg',
                     type='filepath',
                     show_download_button=False,
+                    show_share_button=False,
                     show_fullscreen_button=False
                 )
 
