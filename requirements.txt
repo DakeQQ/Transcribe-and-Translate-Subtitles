@@ -1,21 +1,22 @@
 # Core dependencies
-torch>=2.7.1
-numpy>=2.3.4
-accelerate>=1.10.1
-transformers>=4.57.1
+torch>=2.9.1
+numpy>=2.4.0
+accelerate>=1.12.0
+transformers>=4.57.3
 sentencepiece>=0.2.1
-psutil>=7.1.0
+psutil>=7.2.1
 py-cpuinfo>=9.0.0
 
 # Audio processing
 pydub>=0.25.1
 soundfile>=0.13.1
-silero_vad>=6.0.0
-faster-whisper>=1.2.0  # Use the VAD only.
-pyannote.audio>=3.4.0
+silero_vad>=6.2.0
+faster-whisper>=1.2.1  # Use the VAD only.
+pyannote.audio>=4.0.3
 
 # Web interface
-gradio>=5.49.0
+gradio>=5.50.0
+brotli>=1.2.0
 
 # ONNX Runtime and Execution Providers
 # 安装 Python 依赖 / Install Python dependencies
