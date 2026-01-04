@@ -24,6 +24,7 @@ PYTHON_PACKAGE = site.getsitepackages()[-1]
 shutil.copyfile(r'./VAD/Silero/utils_vad.py', PYTHON_PACKAGE + r'/silero_vad/utils_vad.py')
 shutil.copyfile(r'./VAD/Silero/model.py', PYTHON_PACKAGE + r'/silero_vad/model.py')
 shutil.copyfile(r'./VAD/Silero/silero_vad.onnx', PYTHON_PACKAGE + r'/silero_vad/data/silero_vad.onnx')
+print('\n注意，Silero-VAD的Python原码已经替换成修改的。\nNote that the Python source code for Silero-VAD has been replaced with a modified version.')
 
 physical_cores = psutil.cpu_count(logical=False)
 print(f'\n找到 {physical_cores} 个物理 CPU 核心。Found {physical_cores} physical CPU cores.\n')
@@ -45,7 +46,7 @@ HARDWARE_LIST = ['CPU', 'GPU_NPU']
 ASR_LIST = [
     'SenseVoice-Small',
     'FunASR-Nano',
-    'FunASR-Nano-MLT'
+    'FunASR-Nano-MLT',
     'Paraformer-Large',
     'FireRedASR-AED-L',
     'Dolphin-Small'
@@ -110,9 +111,9 @@ VAD_LIST = [
 ]
 
 LLM_LIST = [
+    'Hunyuan-MT-1.5-1.8B-Abliterated',
     'Qwen-3-4B-Instruct-2507-Abliterated',
     'Qwen-3-8B-Abliterated-v2',
-    'Hunyuan-MT-7B-Abliterated',
     'Seed-X-PRO-7B',
     'Whisper'
 ]
@@ -1316,15 +1317,15 @@ def MAIN_PROCESS(
 
     def inference_C_sensevoice(_max_asr_segment, _start, _end, _inv_audio_len, _audio, _sample_rate, _language_idx):
         _start_indices = _start * _sample_rate
-        _audio = _audio[..., int(_start_indices): int(_end * _sample_rate)]
-        audio_segment_len = _audio.shape[-1]
+        audio_segment = _audio[..., int(_start_indices): int(_end * _sample_rate)]
+        audio_segment_len = audio_segment.shape[-1]
         INPUT_AUDIO_LENGTH = min(_max_asr_segment, audio_segment_len)
         _stride_step = INPUT_AUDIO_LENGTH
         _slice_start = 0
         _slice_end = INPUT_AUDIO_LENGTH
         saved_text = ''
         while _slice_start < audio_segment_len:
-            wave_form = onnxruntime.OrtValue.ortvalue_from_numpy(np.concatenate([pad_zeros, _audio[..., _slice_start: _slice_end], pad_zeros], axis=-1), device_type_C, DEVICE_ID)
+            wave_form = onnxruntime.OrtValue.ortvalue_from_numpy(np.concatenate([pad_zeros, audio_segment[..., _slice_start: _slice_end], pad_zeros], axis=-1), device_type_C, DEVICE_ID)
             token_ids = ort_session_C._sess.run_with_ort_values({in_name_C0: wave_form._ortvalue, in_name_C1: _language_idx}, out_name_C, run_options)
             saved_text += tokenizer.decode(token_ids[0].numpy().tolist())[0]
             _slice_start += _stride_step
@@ -1333,15 +1334,15 @@ def MAIN_PROCESS(
 
     def inference_C_paraformer(_max_asr_segment, _start, _end, _inv_audio_len, _audio, _sample_rate, _is_english):
         _start_indices = _start * _sample_rate
-        _audio = _audio[..., int(_start_indices): int(_end * _sample_rate)]
-        audio_segment_len = _audio.shape[-1]
+        audio_segment = _audio[..., int(_start_indices): int(_end * _sample_rate)]
+        audio_segment_len = audio_segment.shape[-1]
         INPUT_AUDIO_LENGTH = min(_max_asr_segment, audio_segment_len)  # You can adjust it.
         _stride_step = INPUT_AUDIO_LENGTH
         _slice_start = 0
         _slice_end = INPUT_AUDIO_LENGTH
         saved_text = ''
         while _slice_start < audio_segment_len:
-            wave_form = onnxruntime.OrtValue.ortvalue_from_numpy(np.concatenate([pad_zeros, _audio[..., _slice_start: _slice_end], pad_zeros], axis=-1), device_type_C, DEVICE_ID)
+            wave_form = onnxruntime.OrtValue.ortvalue_from_numpy(np.concatenate([pad_zeros, audio_segment[..., _slice_start: _slice_end], pad_zeros], axis=-1), device_type_C, DEVICE_ID)
             token_ids = ort_session_C._sess.run_with_ort_values({in_name_C0: wave_form._ortvalue}, out_name_C, run_options)
             saved_text += tokenizer[token_ids[0].numpy()[0]]
             _slice_start += _stride_step
@@ -1359,8 +1360,8 @@ def MAIN_PROCESS(
                                  _init_repeat_penality, _init_batch_size, _init_penality_reset_count,
                                  _init_save_id_greedy, _is_whisper):
         _start_indices = _start * _sample_rate
-        _audio = _audio[..., int(_start_indices): int(_end * _sample_rate)]
-        audio_segment_len = _audio.shape[-1]
+        audio_segment = _audio[..., int(_start_indices): int(_end * _sample_rate)]
+        audio_segment_len = audio_segment.shape[-1]
         INPUT_AUDIO_LENGTH = min(_max_asr_segment, audio_segment_len)  # You can adjust it.
         _stride_step = INPUT_AUDIO_LENGTH
         _slice_start = 0
@@ -1389,7 +1390,7 @@ def MAIN_PROCESS(
                 else:
                     penality_reset_count_greedy = _init_penality_reset_count
             num_decode = 0
-            wave_form = onnxruntime.OrtValue.ortvalue_from_numpy(np.concatenate([pad_zeros, _audio[..., _slice_start: _slice_end], pad_zeros], axis=-1), device_type_C, DEVICE_ID)
+            wave_form = onnxruntime.OrtValue.ortvalue_from_numpy(np.concatenate([pad_zeros, audio_segment[..., _slice_start: _slice_end], pad_zeros], axis=-1), device_type_C, DEVICE_ID)
             all_outputs_C = ort_session_C._sess.run_with_ort_values({in_name_C0: wave_form._ortvalue}, out_name_C, run_options)
             input_feed_D.update(zip(in_name_D[num_keys_values_plus_2: num_keys_values2_plus_2], all_outputs_C))
             while num_decode < generate_limit:
@@ -1483,15 +1484,15 @@ def MAIN_PROCESS(
                              _init_batch_size, _init_penality_reset_count, _init_save_id_greedy, _lang_id,
                              _region_id):
         start_indices = _start * _sample_rate
-        _audio = _audio[..., int(start_indices): int(_end * _sample_rate)]
-        audio_segment_len = _audio.shape[-1]
+        audio_segment = _audio[..., int(start_indices): int(_end * _sample_rate)]
+        audio_segment_len = audio_segment.shape[-1]
         INPUT_AUDIO_LENGTH = min(_max_asr_segment, audio_segment_len)  # You can adjust it.
         _stride_step = INPUT_AUDIO_LENGTH
         _slice_start = 0
         _slice_end = INPUT_AUDIO_LENGTH
         saved_text = ''
         while _slice_start < audio_segment_len:
-            wave_form = onnxruntime.OrtValue.ortvalue_from_numpy(np.concatenate([pad_zeros, _audio[..., _slice_start: _slice_end], pad_zeros], axis=-1), device_type_C, DEVICE_ID)
+            wave_form = onnxruntime.OrtValue.ortvalue_from_numpy(np.concatenate([pad_zeros, audio_segment[..., _slice_start: _slice_end], pad_zeros], axis=-1), device_type_C, DEVICE_ID)
             all_outputs_C = ort_session_C._sess.run_with_ort_values({in_name_C0: wave_form._ortvalue}, out_name_C, run_options)
             input_feed_D = {
                 in_name_D[-1]: _init_attention_mask_D_1,
@@ -1624,15 +1625,15 @@ def MAIN_PROCESS(
                                  _init_past_keys_D, _init_past_values_D, _init_save_id_beam, _init_repeat_penality, _init_batch_size, 
                                  _init_penality_reset_count, _init_save_id_greedy, _transcribe_prompt, _init_prompt_embed):
         _start_indices = _start * _sample_rate
-        _audio = _audio[..., int(_start_indices): int(_end * _sample_rate)]
-        audio_segment_len = _audio.shape[-1]
+        audio_segment = _audio[..., int(_start_indices): int(_end * _sample_rate)]
+        audio_segment_len = audio_segment.shape[-1]
         INPUT_AUDIO_LENGTH = min(_max_asr_segment, audio_segment_len)  # You can adjust it.
         _stride_step = INPUT_AUDIO_LENGTH
         _slice_start = 0
         _slice_end = INPUT_AUDIO_LENGTH
         saved_text = ''
         while _slice_start < audio_segment_len:
-            wave_form = onnxruntime.OrtValue.ortvalue_from_numpy(np.concatenate([pad_zeros, _audio[..., _slice_start: _slice_end], pad_zeros], axis=-1), device_type_C, DEVICE_ID)
+            wave_form = onnxruntime.OrtValue.ortvalue_from_numpy(np.concatenate([pad_zeros, audio_segment[..., _slice_start: _slice_end], pad_zeros], axis=-1), device_type_C, DEVICE_ID)
             input_feed_C = {
                 in_name_C[0]: wave_form._ortvalue,
                 in_name_C[1]: _init_prompt_embed,
@@ -1811,10 +1812,10 @@ def MAIN_PROCESS(
             has_npu = (('OpenVINOExecutionProvider' in usable_providers) and has_npu) or ('VitisAIExecutionProvider' in usable_providers) or ('QNNExecutionProvider' in usable_providers)
             cuda_options = {
                 'device_id': DEVICE_ID,
-                'gpu_mem_limit': 64 * 1073741824,  # 64 GB
-                'arena_extend_strategy': 'kNextPowerOfTwo',  # ["kNextPowerOfTwo", "kSameAsRequested"]
-                'cudnn_conv_algo_search': 'EXHAUSTIVE',  # ["DEFAULT", "HEURISTIC", "EXHAUSTIVE"]
-                'sdpa_kernel': '2',  # ["0", "1", "2"]
+                'gpu_mem_limit': 64 * 1073741824,               # 64 GB
+                'arena_extend_strategy': 'kNextPowerOfTwo',     # ["kNextPowerOfTwo", "kSameAsRequested"]
+                'cudnn_conv_algo_search': 'EXHAUSTIVE',         # ["DEFAULT", "HEURISTIC", "EXHAUSTIVE"]
+                'sdpa_kernel': '2',                             # ["0", "1", "2"]
                 'use_tf32': '1',
                 'fuse_conv_bias': '0',
                 'cudnn_conv_use_max_workspace': '1',
@@ -1823,7 +1824,7 @@ def MAIN_PROCESS(
                 'tunable_op_tuning_enable': '0',
                 'tunable_op_max_tuning_duration_ms': 1000,
                 'do_copy_in_default_stream': '0',
-                'enable_cuda_graph': '0',  # Set to '0' to avoid potential errors when enabled.
+                'enable_cuda_graph': '0',                       # Set to '0' to avoid potential errors when enabled.
                 'prefer_nhwc': '0',
                 'enable_skip_layer_norm_strict_mode': '0',
                 'use_ep_level_unified_stream': '0',
@@ -1831,15 +1832,15 @@ def MAIN_PROCESS(
             rocm_options = {
                 'device_id': DEVICE_ID,
                 'do_copy_in_default_stream': True,
-                'gpu_mem_limit': 64 * 1024 * 1024 * 1024,  # 64 GB,
-                'arena_extend_strategy': 'kNextPowerOfTwo',  # ["kNextPowerOfTwo", "kSameAsRequested"],
+                'gpu_mem_limit': 64 * 1024 * 1024 * 1024,       # 64 GB,
+                'arena_extend_strategy': 'kNextPowerOfTwo',     # ["kNextPowerOfTwo", "kSameAsRequested"],
             }
             if 'NvTensorRTRTXExecutionProvider' in usable_providers:
                 device_type = 'cuda'
                 ORT_Accelerate_Providers = ['NvTensorRTRTXExecutionProvider']
                 if 'CUDAExecutionProvider' in usable_providers:
                     ORT_Accelerate_Providers = ['NvTensorRTRTXExecutionProvider', 'CUDAExecutionProvider']
-            # elif 'TensorrtExecutionProvider' in usable_providers:
+            # elif 'TensorrtExecutionProvider' in usable_providers:  # Temporarily disable TensorRT due to compatibility issues.
             #     device_type = 'cuda'
             #     ORT_Accelerate_Providers = ['TensorrtExecutionProvider']
             #     if 'CUDAExecutionProvider' in usable_providers:
@@ -2007,21 +2008,20 @@ def MAIN_PROCESS(
         provider_options = [
             {
                 'device_id': DEVICE_ID,
-                'performance_preference': 'high_performance',  # [high_performance, default, minimum_power]
-                'device_filter': 'gpu'  # [any, npu, gpu]
+                'performance_preference': 'high_performance',   # [high_performance, default, minimum_power]
+                'device_filter': 'gpu'                          # [any, npu, gpu]
             }
         ]
     elif 'CoreMLExecutionProvider' in ORT_Accelerate_Providers[0]:
         provider_options = [
             {
-                'ModelFormat': 'MLProgram',  # [MLProgram, NeuralNetwork]
-                'MLComputeUnits': 'ALL',  # [CPUOnly, CPUAndNeuralEngine, CPUAndGPU, ALL]
-                'RequireStaticInputShapes': '0',  # [0, 1]
-                'EnableOnSubgraphs': '1',  # [0, 1]
-                'SpecializationStrategy': 'Default',  # [Default, FastPrediction]
-                'AllowLowPrecisionAccumulationOnGPU': '1',
-                # [0, 1]; 1: Use low precision data(float16) to accumulate data.
-                'ProfileComputePlan': '0'  # [0, 1]
+                'ModelFormat': 'MLProgram',                 # [MLProgram, NeuralNetwork]
+                'MLComputeUnits': 'ALL',                    # [CPUOnly, CPUAndNeuralEngine, CPUAndGPU, ALL]
+                'RequireStaticInputShapes': '0',            # [0, 1]
+                'EnableOnSubgraphs': '1',                   # [0, 1]
+                'SpecializationStrategy': 'Default',        # [Default, FastPrediction]
+                'AllowLowPrecisionAccumulationOnGPU': '1',  # [0, 1]; 1: Use low precision data(float16) to accumulate data.
+                'ProfileComputePlan': '0'                   # [0, 1]
             }
         ]
     elif 'QNNExecutionProvider' in ORT_Accelerate_Providers[0]:
@@ -2032,11 +2032,11 @@ def MAIN_PROCESS(
                 'profiling_level': 'off',
                 'profiling_file_path': './Cache/qnn_profile_path.csv',
                 'rpc_control_latency': '10',
-                'vtcm_mb': '0',  # 0 for auto
+                'vtcm_mb': '0',                             # 0 for auto
                 'htp_performance_mode': 'burst',
                 'qnn_context_priority': 'high',
                 'htp_graph_finalization_optimization_mode': '3',
-                'soc_model': '0',  # 0 for auto
+                'soc_model': '0',                           # 0 for auto
                 'device_id': '0',
                 'offload_graph_io_quantization': '1',
                 'enable_htp_shared_memory_allocator': '0',
@@ -2395,6 +2395,8 @@ def MAIN_PROCESS(
         humaware_vad = humaware_vad.float().eval()
         INPUT_AUDIO_LENGTH_B = 512
         stride_step_B = INPUT_AUDIO_LENGTH_B
+        window_size = 15
+        threshold = slider_vad_MIN_SPEECH_DURATION * SAMPLE_RATE_16K / (INPUT_AUDIO_LENGTH_B * window_size)
         print("\nVAD 可用的硬件 VAD Usable Providers: ['CPUExecutionProvider']")
     elif vad_type == 5:
         # Using CPU is fast enough.
@@ -2406,11 +2408,15 @@ def MAIN_PROCESS(
         in_name_B0 = in_name_B[0].name
         out_name_B = [out_name_B[i].name for i in range(len(out_name_B))]
         slider_vad_SILENCE_SCORE = 1.0 - slider_vad_SILENCE_SCORE
+        window_size = 25
+        threshold = slider_vad_MIN_SPEECH_DURATION * SAMPLE_RATE_16K / (320 * window_size)
     elif vad_type == 6:
         from VAD.TEN.include.ten_vad import TenVad
         ten_vad = TenVad(256, 0.5, lib_path)  # TEN_VAD_FRAME_LENGTH = 256, standard threshold = 0.5
         INPUT_AUDIO_LENGTH_B = 256
         stride_step_B = INPUT_AUDIO_LENGTH_B
+        window_size = 30
+        threshold = slider_vad_MIN_SPEECH_DURATION * SAMPLE_RATE_16K / (INPUT_AUDIO_LENGTH_B * window_size)
         print("\nVAD 可用的硬件 VAD Usable Providers: ['CPUExecutionProvider']")
 
     # Load ASR model
@@ -2473,7 +2479,6 @@ def MAIN_PROCESS(
             ids_324 = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([324], dtype=np.int64), device_type_C, DEVICE_ID)
             ids_39999 = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([[39999]], dtype=np.int32), device_type_C, DEVICE_ID)  # int32
             ids_vocab_size = onnxruntime.OrtValue.ortvalue_from_numpy(np.array([vocab_size], dtype=np.int64), device_type_C, DEVICE_ID)
-
             init_ids_len_2 = ids_len_2._ortvalue
             init_ids_len_5 = ids_len_5._ortvalue
             init_ids_0 = ids_0._ortvalue
@@ -2482,7 +2487,6 @@ def MAIN_PROCESS(
             init_ids_324 = ids_324._ortvalue
             init_ids_39999 = ids_39999._ortvalue
             init_ids_vocab_size = ids_vocab_size._ortvalue
-
         ort_session_D = onnxruntime.InferenceSession(onnx_model_D, sess_options=session_opts, providers=ORT_Accelerate_Providers_C, provider_options=provider_options_C)
         in_name_C = ort_session_C.get_inputs()
         out_name_C = ort_session_C.get_outputs()
@@ -2640,7 +2644,10 @@ def MAIN_PROCESS(
             transcribe_prompt = f'\n\n将这段{region}语音转写成中文：'
         else:
             transcribe_prompt = f'\n\n转写这段{transcribe_language_zh}语音：'
-        transcribe_prompt = f'请结合上下文信息与热词表，准确地完成语音转写任务。{hot_words_prompt}{transcribe_prompt}'
+        if hot_words_prompt != '':
+            transcribe_prompt = f'请结合上下文信息与热词表，准确地完成语音转写任务。忽略环境噪声、音乐声和背景交谈人声。{hot_words_prompt}{transcribe_prompt}'
+        else:
+            transcribe_prompt = f'请考虑上下文信息，准确地完成语音转写任务。忽略环境噪声、音乐声和背景交谈人声。{transcribe_prompt}'
         tokens = tokenizer(transcribe_prompt, return_tensors='np')['input_ids'].astype(np.int32)
         input_ids = onnxruntime.OrtValue.ortvalue_from_numpy(tokens, device_type, DEVICE_ID)
         input_feed_K = {in_name_K: input_ids}
@@ -2928,22 +2935,14 @@ def MAIN_PROCESS(
         if USE_DENOISED:
             if audio_len > INPUT_AUDIO_LENGTH_A:
                 num_windows = int(np.ceil((audio_len - INPUT_AUDIO_LENGTH_A) / stride_step_A)) + 1
-                total_length_needed = (num_windows - 1) * stride_step_A + INPUT_AUDIO_LENGTH_A
-                pad_amount = total_length_needed - audio_len
-                final_slice = audio[..., -pad_amount:].astype(np.float32)
-                white_noise = (np.sqrt(np.mean(final_slice * final_slice, dtype=np.float32), dtype=np.float32) * np.random.normal(loc=0.0, scale=1.0, size=(1, 1, pad_amount))).astype(audio.dtype)
-                audio = np.concatenate((audio, white_noise), axis=-1)
-                del final_slice
-                del pad_amount
-                del total_length_needed
+                zeros_padding = np.zeros((1, 1, (num_windows - 1) * stride_step_A + INPUT_AUDIO_LENGTH_A - audio_len), dtype=audio.dtype)
+                audio = np.concatenate((audio, zeros_padding), axis=-1)
                 del num_windows
-                del white_noise
+                del zeros_padding
             elif audio_len < INPUT_AUDIO_LENGTH_A:
-                audio_float = audio.astype(np.float32)
-                white_noise = (np.sqrt(np.mean(audio_float * audio_float, dtype=np.float32), dtype=np.float32) * np.random.normal(loc=0.0, scale=1.0, size=(1, 1, INPUT_AUDIO_LENGTH_A - audio_len))).astype(audio.dtype)
-                audio = np.concatenate((audio, white_noise), axis=-1)
-                del audio_float
-                del white_noise
+                zeros_padding = np.zeros((1, 1, INPUT_AUDIO_LENGTH_A - audio_len), dtype=audio.dtype)
+                audio = np.concatenate((audio, zeros_padding), axis=-1)
+                del zeros_padding
             aligned_len = audio.shape[-1]
             print(
                 '----------------------------------------------------------------------------------------------------------')
@@ -3034,26 +3033,16 @@ def MAIN_PROCESS(
                 waveform_len = len(waveform)
                 if waveform_len > INPUT_AUDIO_LENGTH_B:
                     num_windows = int(torch.ceil(torch.tensor((waveform_len - INPUT_AUDIO_LENGTH_B) / stride_step_B))) + 1
-                    total_length_needed = (num_windows - 1) * stride_step_B + INPUT_AUDIO_LENGTH_B
-                    pad_amount = total_length_needed - waveform_len
-                    final_slice = waveform[-pad_amount:]
-                    rms = torch.sqrt(torch.mean(final_slice * final_slice))
-                    white_noise = rms * torch.randn(pad_amount, device=waveform.device, dtype=waveform.dtype)
-                    waveform = torch.cat((waveform, white_noise), dim=-1)
+                    zeros_padding = np.zeros((num_windows - 1) * stride_step_B + INPUT_AUDIO_LENGTH_B - waveform_len, dtype=waveform.dtype)
+                    waveform = torch.cat((waveform, zeros_padding), dim=-1)
                     waveform_len = len(waveform)
-                    del white_noise
-                    del rms
-                    del final_slice
-                    del pad_amount
-                    del total_length_needed
+                    del zeros_padding
                     del num_windows
                 elif waveform_len < INPUT_AUDIO_LENGTH_B:
-                    rms = torch.sqrt(torch.mean(waveform * waveform))
-                    white_noise = rms * torch.randn(INPUT_AUDIO_LENGTH_B - audio_len, device=waveform.device, dtype=waveform.dtype)
-                    waveform = torch.cat((waveform, white_noise), dim=-1)
+                    zeros_padding = np.zeros(INPUT_AUDIO_LENGTH_B - audio_len, dtype=waveform.dtype)
+                    waveform = torch.cat((waveform, zeros_padding), dim=-1)
                     waveform_len = len(waveform)
-                    del rms
-                    del white_noise
+                    del zeros_padding
                 silence = True
                 saved = []
                 scores = []
@@ -3061,8 +3050,6 @@ def MAIN_PROCESS(
                     scores.append(humaware_vad(waveform[i: i + INPUT_AUDIO_LENGTH_B], SAMPLE_RATE_16K))
                 scores = np.array(scores, dtype=np.float32).flatten()
                 score_len = scores.shape[-1]
-                window_size = 20
-                threshold = 0.8
                 for i in range(score_len):
                     end_idx = min(i + window_size, score_len)
                     window = scores[i:end_idx]
@@ -3088,8 +3075,6 @@ def MAIN_PROCESS(
             signal_len = all_outpus_B[2].numpy()[0]
             silence = True
             saved = []
-            window_size = 20
-            threshold = 0.65
             for i in range(signal_len):
                 end_idx = min(i + window_size, signal_len)
                 if silence:
@@ -3114,22 +3099,14 @@ def MAIN_PROCESS(
             waveform = waveform.reshape(-1)
             if audio_len > INPUT_AUDIO_LENGTH_B:
                 num_windows = int(np.ceil((audio_len - INPUT_AUDIO_LENGTH_B) / stride_step_B)) + 1
-                total_length_needed = (num_windows - 1) * stride_step_B + INPUT_AUDIO_LENGTH_B
-                pad_amount = total_length_needed - audio_len
-                final_slice = waveform[-pad_amount:].astype(np.float32)
-                white_noise = (np.sqrt(np.mean(final_slice * final_slice, dtype=np.float32), dtype=np.float32) * np.random.normal(loc=0.0, scale=1.0, size=(pad_amount))).astype(waveform.dtype)
-                waveform = np.concatenate((waveform, white_noise), axis=-1)
-                del white_noise
-                del final_slice
-                del pad_amount
-                del total_length_needed
+                zeros_padding = np.zeros((num_windows - 1) * stride_step_B + INPUT_AUDIO_LENGTH_B - audio_len, dtype=waveform.dtype)
+                waveform = np.concatenate((waveform, zeros_padding), axis=-1)
+                del zeros_padding
                 del num_windows
             elif audio_len < INPUT_AUDIO_LENGTH_B:
-                audio_float = waveform.astype(np.float32)
-                white_noise = (np.sqrt(np.mean(audio_float * audio_float, dtype=np.float32), dtype=np.float32) * np.random.normal(loc=0.0, scale=1.0, size=(INPUT_AUDIO_LENGTH_B - audio_len))).astype(waveform.dtype)
-                waveform = np.concatenate((waveform, white_noise), axis=-1)
-                del audio_float
-                del white_noise
+                zeros_padding = np.zeros(INPUT_AUDIO_LENGTH_B - audio_len, dtype=waveform.dtype)
+                waveform = np.concatenate((waveform, zeros_padding), axis=-1)
+                del zeros_padding
             audio_len = waveform.shape[-1]
             inv_audio_len = 100.0 / audio_len
             silence = True
@@ -3145,8 +3122,6 @@ def MAIN_PROCESS(
                 slice_end = slice_start + INPUT_AUDIO_LENGTH_B
             scores = np.array(scores, dtype=np.float32).flatten()
             score_len = scores.shape[-1]
-            window_size = 20
-            threshold = 0.8
             for i in range(score_len):
                 end_idx = min(i + window_size, score_len)
                 window = scores[i:end_idx]
@@ -3350,23 +3325,23 @@ def MAIN_PROCESS(
                 if 'Qwen' in model_llm:
                     system_prompt = (
                         '### INSTRUCTIONS ###\n'
-                        f'1. Translate the provided text from {transcribe_language} to {translate_language}.\n'
+                       f'1. Translate the provided text from {transcribe_language} to {translate_language}.\n'
                         '2. The input format is: ID-TEXT\n'
                         '3. Your output format MUST be exactly: ID-TRANSLATION\n'
                         '4. Do not add any extra content, commentary, explanations, chain of thought.\n'
-                        f'5. {llm_prompt}\n'
+                       f'5. {llm_prompt}\n'
                     )
                     LLM_STOP_TOKEN = [151643, 151645]
                     prompt_head = f'<|im_start|>system\n{system_prompt}<|im_end|>\n<|im_start|>user\n'
                     prompt_tail = '<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n'
                 elif 'Hunyuan-MT' in model_llm:
-                    LLM_STOP_TOKEN = [127960]
+                    LLM_STOP_TOKEN = [1, 20, 120020]
                     en_target_language, zh_target_language = get_language_hunyuan(translate_language)
                     if (translate_language == 'Chinese') or (transcribe_language == 'Chinese'):
-                        prompt_head = f'<|startoftext|>将下面的文本翻译成{zh_target_language}，不要额外解释。\n\n'
+                        prompt_head = f'<|hy_begin▁of▁sentence|><|hy_User|>将以下文本翻译为{zh_target_language}，注意只需要输出翻译后的结果，不要额外解释：\n\n'
                     else:
-                        prompt_head = f'<|startoftext|>Translate the following segment into {en_target_language}, without additional explanation.\n\n'
-                    prompt_tail = '<|extra_0|>'
+                        prompt_head = f'<|hy_begin▁of▁sentence|><|hy_User|>Translate the following segment into {en_target_language}, without additional explanation.\n\n'
+                    prompt_tail = '<｜hy_place▁holder▁no▁8｜>'
                 elif 'Seed-X' in model_llm:
                     LLM_STOP_TOKEN = [2]
                     abbr = get_language_seedx(translate_language)
@@ -3476,15 +3451,15 @@ def MAIN_PROCESS(
                         io_binding_E.bind_ortvalue_input(in_name_E[-1], init_attention_mask_E_0_ort)
                         io_binding_E.bind_ortvalue_input(in_name_E[-2], init_ids_len_1_ort)
                     save_id_llm[num_decode] = max_logit_ids
-                    num_decode += 1
                     bind_inputs_to_device(io_binding_E, in_name_E, all_outputs_E, amount_of_outputs_E)
+                    num_decode += 1
                 if num_decode > 0:
                     save_text = tokenizer_llm.decode(save_id_llm[:num_decode], skip_special_tokens=True, clean_up_tokenization_spaces=False)
                     if is_seed_x:
                         save_text.replace('[COT]', '')
                         break
                     print(save_text, end='', flush=True)
-                print(f'\n\nDecode: {(num_decode / (time.time() - start_time)):.3f} token/s')
+                print(f'\n\nDecode: {((num_decode + 1) / (time.time() - start_time)):.3f} token/s')
                 translated_responses.append(save_text)
                 print(f'Translating: - {chunk_end * inv_total_lines:.3f}%')
                 print('----------------------------------------------------------------------------------------------------------')
@@ -3755,7 +3730,7 @@ def create_interface():
                     choices=LLM_LIST,
                     label='大型语言模型 / LLM Model',
                     info='用于翻译的模型。\nModel used for translation.',
-                    value=LLM_LIST[3],
+                    value=LLM_LIST[0],
                     visible=True,
                     interactive=True
                 )
