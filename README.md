@@ -228,7 +228,7 @@ Transcribe_and_Translate_Subtitles/Results/Subtitles/
   - FunASR-Nano-2512
   - FunASR-Nano-MLT-2512
 - ✅ **更新 LLM / update LLM**:
-- 更新 Hunyuan-MT-1.5-1.8B-Abliterated
+  - 更新 Hunyuan-MT-1.5-1.8B-Abliterated
 - ✅ **性能改进 / Performance Improvements**:
   - 改善 SenseVoice & Paraformer 长音频的准确度
   - 改善 Nvidia_VAD, Ten_VAD, HumAware_VAD 音频切割准确度
