@@ -1009,45 +1009,45 @@ def update_denoiser(dropdown_model_denoiser):
 
 def update_vad(dropdown_model_vad):
     if "Pyannote" in dropdown_model_vad:
-        update_A = gr.update(visible=False, value=0.4)
-        update_B = gr.update(visible=False, value=0.4)
+        update_A = gr.update(visible=False, value=0.45)
+        update_B = gr.update(visible=False, value=0.45)
         update_C = gr.update(visible=False)
         update_D = gr.update(visible=False)
         update_E = gr.update(visible=True, value=0.2)
-        update_F = gr.update(visible=True, value=0.05)
-        update_G = gr.update(visible=True, value=0.4)
+        update_F = gr.update(visible=True, value=0.1)
+        update_G = gr.update(visible=True, value=0.25)
     elif "Silero" in dropdown_model_vad:
-        update_A = gr.update(visible=True, value=0.4)
-        update_B = gr.update(visible=True, value=0.4)
+        update_A = gr.update(visible=True, value=0.45)
+        update_B = gr.update(visible=True, value=0.45)
         update_C = gr.update(visible=True)
         update_D = gr.update(visible=True)
         update_E = gr.update(visible=True, value=0.2)
-        update_F = gr.update(visible=True, value=0.05)
-        update_G = gr.update(visible=True, value=0.4)
+        update_F = gr.update(visible=True, value=0.1)
+        update_G = gr.update(visible=True, value=0.25)
     elif "HumAware" in dropdown_model_vad:
-        update_A = gr.update(visible=True, value=0.4)
-        update_B = gr.update(visible=True, value=0.4)
+        update_A = gr.update(visible=True, value=0.45)
+        update_B = gr.update(visible=True, value=0.45)
         update_C = gr.update(visible=True)
         update_D = gr.update(visible=True)
         update_E = gr.update(visible=True, value=0.2)
-        update_F = gr.update(visible=True, value=0.05)
-        update_G = gr.update(visible=True, value=0.4)
+        update_F = gr.update(visible=True, value=0.1)
+        update_G = gr.update(visible=True, value=0.25)
     elif "MarbleNet" in dropdown_model_vad:
-        update_A = gr.update(visible=True, value=0.4)
-        update_B = gr.update(visible=True, value=0.4)
+        update_A = gr.update(visible=True, value=0.45)
+        update_B = gr.update(visible=True, value=0.45)
         update_C = gr.update(visible=True)
         update_D = gr.update(visible=True)
         update_E = gr.update(visible=True, value=0.2)
-        update_F = gr.update(visible=True, value=0.05)
-        update_G = gr.update(visible=True, value=0.4)
+        update_F = gr.update(visible=True, value=0.1)
+        update_G = gr.update(visible=True, value=0.25)
     elif dropdown_model_vad == "TEN":
-        update_A = gr.update(visible=True, value=0.4)
-        update_B = gr.update(visible=True, value=0.4)
+        update_A = gr.update(visible=True, value=0.45)
+        update_B = gr.update(visible=True, value=0.45)
         update_C = gr.update(visible=True)
         update_D = gr.update(visible=True)
         update_E = gr.update(visible=True, value=0.2)
-        update_F = gr.update(visible=True, value=0.05)
-        update_G = gr.update(visible=True, value=0.4)
+        update_F = gr.update(visible=True, value=0.1)
+        update_G = gr.update(visible=True, value=0.25)
     else:
         update_A = gr.update(visible=False)
         update_B = gr.update(visible=False)
@@ -3867,7 +3867,7 @@ def create_interface():
                 step=0.05,
                 label='VAD 填充 / VAD Padding',
                 info='在时间戳的开头和结尾添加填充。单位：秒。\nAdd padding to the start and end of the timestamps. Unit: Seconds.',
-                value=0.4,
+                value=0.25,
                 visible=True,
                 interactive=True
             )
