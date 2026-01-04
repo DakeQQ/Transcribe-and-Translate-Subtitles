@@ -2646,9 +2646,9 @@ def MAIN_PROCESS(
         else:
             transcribe_prompt = f'\n\n转写这段{transcribe_language_zh}语音：'
         if hot_words_prompt != '':
-            transcribe_prompt = f'请结合上下文信息与热词表，准确地完成语音转写任务。忽略环境噪声、音乐声和背景交谈人声。{hot_words_prompt}{transcribe_prompt}'
+            transcribe_prompt = f'请结合上下文信息与热词表，准确地完成语音转写任务。{hot_words_prompt}{transcribe_prompt}'
         else:
-            transcribe_prompt = f'请考虑上下文信息，准确地完成语音转写任务。忽略环境噪声、音乐声和背景交谈人声。{transcribe_prompt}'
+            transcribe_prompt = f'请考虑上下文信息，准确地完成语音转写任务。{transcribe_prompt}'
         tokens = tokenizer(transcribe_prompt, return_tensors='np')['input_ids'].astype(np.int32)
         input_ids = onnxruntime.OrtValue.ortvalue_from_numpy(tokens, device_type, DEVICE_ID)
         input_feed_K = {in_name_K: input_ids}
@@ -3339,7 +3339,7 @@ def MAIN_PROCESS(
                     LLM_STOP_TOKEN = [1, 20, 120020]
                     en_target_language, zh_target_language = get_language_hunyuan(translate_language)
                     if (translate_language == 'Chinese') or (transcribe_language == 'Chinese'):
-                        prompt_head = f'<|hy_begin▁of▁sentence|><|hy_User|>将以下文本翻译为{zh_target_language}，注意只需要输出翻译后的结果，不要额外解释：\n\n'
+                        prompt_head = f'<|hy_begin▁of▁sentence|><|hy_User|>将以下文本翻译为{zh_target_language}，仅输出翻译后的结果，不要额外解释：\n\n'
                     else:
                         prompt_head = f'<|hy_begin▁of▁sentence|><|hy_User|>Translate the following segment into {en_target_language}, without additional explanation.\n\n'
                     prompt_tail = '<｜hy_place▁holder▁no▁8｜>'
