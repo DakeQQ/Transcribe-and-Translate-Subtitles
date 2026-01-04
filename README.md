@@ -151,7 +151,7 @@ Transcribe_and_Translate_Subtitles/Results/Subtitles/
 ### 🤖 翻译模型 (LLM) / Translation Models (LLM)
 - **[Qwen-3-4B-Instruct-2507-Abliterated](https://huggingface.co/huihui-ai/Huihui-Qwen3-4B-Instruct-2507-abliterated)**
 - **[Qwen-3-8B-Abliterated](https://huggingface.co/huihui-ai/Huihui-Qwen3-8B-abliterated-v2)**
-- **[Hunyuan-MT-7B-Abliterated](https://huggingface.co/huihui-ai/Huihui-Hunyuan-MT-7B-abliterated)**
+- **[Hunyuan-MT-1.5-1.8B-Abliterated](https://huggingface.co/huihui-ai/Huihui-HY-MT1.5-1.8B-abliterated)**
 - **[Seed-X-PRO-7B](https://www.modelscope.cn/models/ByteDance-Seed/Seed-X-PPO-7B)**
 
 ---
@@ -227,6 +227,8 @@ Transcribe_and_Translate_Subtitles/Results/Subtitles/
 - ✅ **新增 ASR / Added ASR**:
   - FunASR-Nano-2512
   - FunASR-Nano-MLT-2512
+- ✅ **更新 LLM / update LLM**:
+- 更新 Hunyuan-MT-1.5-1.8B-Abliterated
 - ✅ **性能改进 / Performance Improvements**:
   - 改善 SenseVoice & Paraformer 长音频的准确度
   - 改善 Nvidia_VAD, Ten_VAD, HumAware_VAD 音频切割准确度
