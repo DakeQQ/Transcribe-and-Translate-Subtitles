@@ -108,6 +108,8 @@ Transcribe_and_Translate_Subtitles/Results/Subtitles/
 
 ### 🗣️ 语音识别 (ASR) / Speech Recognition (ASR)
 #### 多语言模型 / Multilingual Models
+- **[Fun-ASR-Nano-2512-Multilingual](https://modelscope.cn/models/FunAudioLLM/Fun-ASR-Nano-2512)**
+- **[Fun-ASR-MLT-Nano-2512-Multilingual](https://modelscope.cn/models/FunAudioLLM/Fun-ASR-MLT-Nano-2512)**
 - **[SenseVoice-Small-Multilingual](https://modelscope.cn/models/iic/SenseVoiceSmall)**
 - **[Dolphin-Small-Asian 亚洲语言](https://github.com/DataoceanAI/Dolphin)**
 - **[Paraformer-Large-Chinese 中文](https://modelscope.cn/models/iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch)**
@@ -221,6 +223,18 @@ Transcribe_and_Translate_Subtitles/Results/Subtitles/
 
 ## 📋 更新历史 / Update History
 
+### 🆕 **2026/1/04** - 更新 / Release
+- ✅ **新增 ASR / Added ASR**:
+  - FunASR-Nano-2512
+  - FunASR-Nano-MLT-2512
+- ✅ **性能改进 / Performance Improvements**:
+  - 改善 SenseVoice & Paraformer 长音频的准确度
+  - 改善 Nvidia_VAD, Ten_VAD, HumAware_VAD 音频切割准确度
+  - 修复 LLM 在翻译时偶尔输出乱码文字
+  - Improve the long audio accuracy of SenseVoice and Paraformer
+  - Improve the accuracy of Nvidia_VAD, Ten_VAD, and HumAwareVAD audio segmentation
+  - Fix LLM occasionally outputting garbled text during translation
+    
 ### 🆕 **2025/9/19** - 重大更新 / Major Release
 - ✅ **新增 ASR / Added ASR**:
   - 28 个地区微调的 Whisper 模型
