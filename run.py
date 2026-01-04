@@ -2396,7 +2396,7 @@ def MAIN_PROCESS(
         INPUT_AUDIO_LENGTH_B = 512
         stride_step_B = INPUT_AUDIO_LENGTH_B
         window_size = 15
-        threshold = slider_vad_MIN_SPEECH_DURATION * SAMPLE_RATE_16K / (INPUT_AUDIO_LENGTH_B * window_size)
+        threshold = slider_vad_MIN_SILENCE_DURATION * SAMPLE_RATE_16K / (1000 * INPUT_AUDIO_LENGTH_B * window_size)
         print("\nVAD 可用的硬件 VAD Usable Providers: ['CPUExecutionProvider']")
     elif vad_type == 5:
         # Using CPU is fast enough.
@@ -2408,15 +2408,16 @@ def MAIN_PROCESS(
         in_name_B0 = in_name_B[0].name
         out_name_B = [out_name_B[i].name for i in range(len(out_name_B))]
         slider_vad_SILENCE_SCORE = 1.0 - slider_vad_SILENCE_SCORE
+        INPUT_AUDIO_LENGTH_B = 320
         window_size = 25
-        threshold = slider_vad_MIN_SPEECH_DURATION * SAMPLE_RATE_16K / (320 * window_size)
+        threshold = slider_vad_MIN_SILENCE_DURATION * SAMPLE_RATE_16K / (1000 * INPUT_AUDIO_LENGTH_B * window_size)
     elif vad_type == 6:
         from VAD.TEN.include.ten_vad import TenVad
         ten_vad = TenVad(256, 0.5, lib_path)  # TEN_VAD_FRAME_LENGTH = 256, standard threshold = 0.5
         INPUT_AUDIO_LENGTH_B = 256
         stride_step_B = INPUT_AUDIO_LENGTH_B
         window_size = 30
-        threshold = slider_vad_MIN_SPEECH_DURATION * SAMPLE_RATE_16K / (INPUT_AUDIO_LENGTH_B * window_size)
+        threshold = slider_vad_MIN_SPEECH_DURATION * SAMPLE_RATE_16K / (1000 * INPUT_AUDIO_LENGTH_B * window_size)
         print("\nVAD 可用的硬件 VAD Usable Providers: ['CPUExecutionProvider']")
 
     # Load ASR model
@@ -3932,7 +3933,7 @@ def create_interface():
                     step=25,
                     label='静音时长判断 / Silence Duration Judgment',
                     info='最短静音时长。单位：毫秒。\nMinimum silence duration. Unit: Milliseconds.',
-                    value=1000,
+                    value=350,
                     visible=True,
                     interactive=True
                 )
