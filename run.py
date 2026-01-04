@@ -3034,13 +3034,13 @@ def MAIN_PROCESS(
                 waveform_len = len(waveform)
                 if waveform_len > INPUT_AUDIO_LENGTH_B:
                     num_windows = int(torch.ceil(torch.tensor((waveform_len - INPUT_AUDIO_LENGTH_B) / stride_step_B))) + 1
-                    zeros_padding = np.zeros((num_windows - 1) * stride_step_B + INPUT_AUDIO_LENGTH_B - waveform_len, dtype=waveform.dtype)
+                    zeros_padding = torch.zeros((num_windows - 1) * stride_step_B + INPUT_AUDIO_LENGTH_B - waveform_len, dtype=waveform.dtype)
                     waveform = torch.cat((waveform, zeros_padding), dim=-1)
                     waveform_len = len(waveform)
                     del zeros_padding
                     del num_windows
                 elif waveform_len < INPUT_AUDIO_LENGTH_B:
-                    zeros_padding = np.zeros(INPUT_AUDIO_LENGTH_B - audio_len, dtype=waveform.dtype)
+                    zeros_padding = torch.zeros(INPUT_AUDIO_LENGTH_B - audio_len, dtype=waveform.dtype)
                     waveform = torch.cat((waveform, zeros_padding), dim=-1)
                     waveform_len = len(waveform)
                     del zeros_padding
@@ -3880,7 +3880,7 @@ def create_interface():
                     step=0.025,
                     label='语音状态分数 / Voice State Score',
                     info='值越大，判断语音状态越困难。\nThe higher the value, the more difficult it is to determine the state of the speech',
-                    value=0.4,
+                    value=0.45,
                     visible=True,
                     interactive=True
                 )
@@ -3890,7 +3890,7 @@ def create_interface():
                     step=0.025,
                     label='静音状态分数 / Silence State Score',
                     info='值越大，越容易截断语音。\nA larger value makes it easier to cut off speaking.',
-                    value=0.4,
+                    value=0.45,
                     visible=True,
                     interactive=True
                 )
@@ -3913,7 +3913,7 @@ def create_interface():
                     step=0.025,
                     label='过滤短语音段 / Filter Short Voice Segment',
                     info='最短语音时长。单位：秒。\nMinimum duration for voice filtering. Unit: Seconds.',
-                    value=0.05,
+                    value=0.1,
                     visible=True,
                     interactive=True
                 )
@@ -3933,7 +3933,7 @@ def create_interface():
                     step=25,
                     label='静音时长判断 / Silence Duration Judgment',
                     info='最短静音时长。单位：毫秒。\nMinimum silence duration. Unit: Milliseconds.',
-                    value=350,
+                    value=400,
                     visible=True,
                     interactive=True
                 )
