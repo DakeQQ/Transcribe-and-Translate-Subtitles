@@ -2395,8 +2395,10 @@ def MAIN_PROCESS(
         humaware_vad = humaware_vad.float().eval()
         INPUT_AUDIO_LENGTH_B = 512
         stride_step_B = INPUT_AUDIO_LENGTH_B
-        window_size = 15
+        window_size = 16
         threshold = slider_vad_MIN_SILENCE_DURATION * SAMPLE_RATE_16K / (1000 * INPUT_AUDIO_LENGTH_B * window_size)
+        if threshold > 1.0:
+            threshold = 1.0
         print("\nVAD 可用的硬件 VAD Usable Providers: ['CPUExecutionProvider']")
     elif vad_type == 5:
         # Using CPU is fast enough.
@@ -2409,15 +2411,19 @@ def MAIN_PROCESS(
         out_name_B = [out_name_B[i].name for i in range(len(out_name_B))]
         slider_vad_SILENCE_SCORE = 1.0 - slider_vad_SILENCE_SCORE
         INPUT_AUDIO_LENGTH_B = 320
-        window_size = 20
+        window_size = 25
         threshold = slider_vad_MIN_SILENCE_DURATION * SAMPLE_RATE_16K / (1000 * INPUT_AUDIO_LENGTH_B * window_size)
+        if threshold > 1.0:
+            threshold = 1.0
     elif vad_type == 6:
         from VAD.TEN.include.ten_vad import TenVad
         ten_vad = TenVad(256, 0.5, lib_path)  # TEN_VAD_FRAME_LENGTH = 256, standard threshold = 0.5
         INPUT_AUDIO_LENGTH_B = 256
         stride_step_B = INPUT_AUDIO_LENGTH_B
-        window_size = 20
+        window_size = 32
         threshold = slider_vad_MIN_SPEECH_DURATION * SAMPLE_RATE_16K / (1000 * INPUT_AUDIO_LENGTH_B * window_size)
+        if threshold > 1.0:
+            threshold = 1.0
         print("\nVAD 可用的硬件 VAD Usable Providers: ['CPUExecutionProvider']")
 
     # Load ASR model
