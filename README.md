@@ -152,6 +152,7 @@ Transcribe_and_Translate_Subtitles/Results/Subtitles/
 - **[Qwen-3-4B-Instruct-2507-Abliterated](https://huggingface.co/huihui-ai/Huihui-Qwen3-4B-Instruct-2507-abliterated)**
 - **[Qwen-3-8B-Abliterated](https://huggingface.co/huihui-ai/Huihui-Qwen3-8B-abliterated-v2)**
 - **[Hunyuan-MT-1.5-1.8B-Abliterated](https://huggingface.co/huihui-ai/Huihui-HY-MT1.5-1.8B-abliterated)**
+- **[Hunyuan-MT-1.5-7B-Abliterated](https://huggingface.co/huihui-ai/Huihui-HY-MT1.5-7B-abliterated)**
 - **[Seed-X-PRO-7B](https://www.modelscope.cn/models/ByteDance-Seed/Seed-X-PPO-7B)**
 
 ---
@@ -223,12 +224,13 @@ Transcribe_and_Translate_Subtitles/Results/Subtitles/
 
 ## 📋 更新历史 / Update History
 
-### 🆕 **2026/1/04** - 更新 / Release
+### 🆕 **2026/1/4** - 更新 / Release
 - ✅ **新增 ASR / Added ASR**:
   - FunASR-Nano-2512
   - FunASR-Nano-MLT-2512
 - ✅ **更新 LLM / update LLM**:
   - 更新 Hunyuan-MT-1.5-1.8B-Abliterated
+  - 更新 Hunyuan-MT-1.5-7B-Abliterated
 - ✅ **性能改进 / Performance Improvements**:
   - 改善 SenseVoice & Paraformer 长音频的准确度
   - 改善 Nvidia_VAD, Ten_VAD, HumAware_VAD 音频切割准确度
@@ -327,5 +329,7 @@ Transcribe_and_Translate_Subtitles/Results/Subtitles/
 
 ## 🗺️ 路线图 / Roadmap
 - [ ] **Beam Search for LLM**
+- [ ] 分离说话人 / Speaker separation
+- [ ] 声纹识别 / voiceprint recognition
 - [ ] **视频超分 / [Video Upscaling](https://github.com/ByteDance-Seed/SeedVR/tree/main)** - 提升分辨率 / Enhance resolution
 - [ ] **实时播放器 / Real-time Player** - 实时转录和翻译 / Live transcription and translation
