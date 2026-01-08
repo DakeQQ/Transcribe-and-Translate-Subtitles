@@ -1009,45 +1009,45 @@ def update_denoiser(dropdown_model_denoiser):
 
 def update_vad(dropdown_model_vad):
     if "Pyannote" in dropdown_model_vad:
-        update_A = gr.update(visible=False, value=0.45)
-        update_B = gr.update(visible=False, value=0.45)
+        update_A = gr.update(visible=False, value=0.4)
+        update_B = gr.update(visible=False, value=0.4)
         update_C = gr.update(visible=False)
         update_D = gr.update(visible=False)
         update_E = gr.update(visible=True, value=0.2)
         update_F = gr.update(visible=True, value=0.1)
-        update_G = gr.update(visible=True, value=0.25)
+        update_G = gr.update(visible=True, value=0.4)
     elif "Silero" in dropdown_model_vad:
-        update_A = gr.update(visible=True, value=0.45)
-        update_B = gr.update(visible=True, value=0.45)
+        update_A = gr.update(visible=True, value=0.4)
+        update_B = gr.update(visible=True, value=0.4)
         update_C = gr.update(visible=True)
         update_D = gr.update(visible=True)
         update_E = gr.update(visible=True, value=0.2)
         update_F = gr.update(visible=True, value=0.1)
-        update_G = gr.update(visible=True, value=0.25)
+        update_G = gr.update(visible=True, value=0.4)
     elif "HumAware" in dropdown_model_vad:
-        update_A = gr.update(visible=True, value=0.45)
-        update_B = gr.update(visible=True, value=0.45)
+        update_A = gr.update(visible=True, value=0.4)
+        update_B = gr.update(visible=True, value=0.4)
         update_C = gr.update(visible=True)
         update_D = gr.update(visible=True)
         update_E = gr.update(visible=True, value=0.2)
         update_F = gr.update(visible=True, value=0.1)
-        update_G = gr.update(visible=True, value=0.25)
+        update_G = gr.update(visible=True, value=0.4)
     elif "MarbleNet" in dropdown_model_vad:
-        update_A = gr.update(visible=True, value=0.45)
-        update_B = gr.update(visible=True, value=0.45)
+        update_A = gr.update(visible=True, value=0.4)
+        update_B = gr.update(visible=True, value=0.4)
         update_C = gr.update(visible=True)
         update_D = gr.update(visible=True)
         update_E = gr.update(visible=True, value=0.2)
         update_F = gr.update(visible=True, value=0.1)
-        update_G = gr.update(visible=True, value=0.25)
+        update_G = gr.update(visible=True, value=0.4)
     elif dropdown_model_vad == "TEN":
-        update_A = gr.update(visible=True, value=0.45)
-        update_B = gr.update(visible=True, value=0.45)
+        update_A = gr.update(visible=True, value=0.4)
+        update_B = gr.update(visible=True, value=0.4)
         update_C = gr.update(visible=True)
         update_D = gr.update(visible=True)
         update_E = gr.update(visible=True, value=0.2)
         update_F = gr.update(visible=True, value=0.1)
-        update_G = gr.update(visible=True, value=0.25)
+        update_G = gr.update(visible=True, value=0.4)
     else:
         update_A = gr.update(visible=False)
         update_B = gr.update(visible=False)
@@ -3873,7 +3873,7 @@ def create_interface():
                 step=0.05,
                 label='VAD 填充 / VAD Padding',
                 info='在时间戳的开头和结尾添加填充。单位：秒。\nAdd padding to the start and end of the timestamps. Unit: Seconds.',
-                value=0.25,
+                value=0.4,
                 visible=True,
                 interactive=True
             )
@@ -3886,7 +3886,7 @@ def create_interface():
                     step=0.025,
                     label='语音状态分数 / Voice State Score',
                     info='值越大，判断语音状态越困难。\nThe higher the value, the more difficult it is to determine the state of the speech',
-                    value=0.45,
+                    value=0.4,
                     visible=True,
                     interactive=True
                 )
@@ -3896,7 +3896,7 @@ def create_interface():
                     step=0.025,
                     label='静音状态分数 / Silence State Score',
                     info='值越大，越容易截断语音。\nA larger value makes it easier to cut off speaking.',
-                    value=0.45,
+                    value=0.4,
                     visible=True,
                     interactive=True
                 )
@@ -3939,7 +3939,7 @@ def create_interface():
                     step=25,
                     label='静音时长判断 / Silence Duration Judgment',
                     info='最短静音时长。单位：毫秒。\nMinimum silence duration. Unit: Milliseconds.',
-                    value=400,
+                    value=1000,
                     visible=True,
                     interactive=True
                 )
