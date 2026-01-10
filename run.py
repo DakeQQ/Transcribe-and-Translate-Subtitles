@@ -408,7 +408,7 @@ DOLPHIN_LANGUAGE_LIST = [
     "Urdu-Auto", "Arabic-Auto",
     "自动-自动", "中文-自动", "粤语-自动", "泰米尔语-自动",
     "乌尔都语-自动", "阿拉伯语-自动",
-
+    "====================================================================== Chinese varieties",
     # Chinese varieties (English)
     "Chinese-Mandarin", "Chinese-Taiwan", "Chinese-Wuyu", "Chinese-Sichuan",
     "Chinese-Shanxi", "Chinese-Anhui", "Chinese-Tianjin", "Chinese-Ningxia",
@@ -416,7 +416,7 @@ DOLPHIN_LANGUAGE_LIST = [
     "Chinese-Shanghai", "Chinese-Hubei", "Chinese-Liaoning", "Chinese-Gansu",
     "Chinese-Fujian", "Chinese-Hunan", "Chinese-Henan", "Chinese-Yunnan",
     "Chinese-Minnan", "Chinese-Wenzhou",
-
+    "====================================================================== Chinese varieties",
     # Chinese varieties (Chinese)
     "中文-普通话", "中文-台湾", "中文-吴语", "中文-四川话",
     "中文-山西话", "中文-安徽话", "中文-天津话", "中文-宁夏话",
@@ -424,19 +424,19 @@ DOLPHIN_LANGUAGE_LIST = [
     "中文-上海话", "中文-湖北话", "中文-辽宁话", "中文-甘肃话",
     "中文-福建话", "中文-湖南话", "中文-河南话", "中文-云南话",
     "中文-闽南语", "中文-温州话",
-
+    "====================================================================== Cantonese and East Asian",
     # Cantonese and East Asian languages
     "Yue-Unknown", "Yue-Hongkong", "Yue-Guangdong", "Japanese",
     "Korean", "Thai", "Vietnamese",
     "粤语-未知", "粤语-香港", "粤语-广东", "日语",
     "韩语", "泰语", "越南语",
-
+    "====================================================================== Southeast Asian",
     # Southeast Asian languages
     "Indonesian", "Malaysian", "Burmese", "Tagalog",
     "Khmer", "Javanese", "Lao", "Filipino", "Sundanese",
     "印度尼西亚语", "马来语", "缅甸语", "塔加洛语",
     "高棉语", "爪哇语", "老挝语", "菲律宾语", "巽他语",
-
+    "====================================================================== South Asian",
     # South Asian languages
     "Hindi", "Bengali", "Tamil-Singaporean", "Tamil-Sri Lankan",
     "Tamil-India", "Tamil-Malaysia", "Telugu", "Gujarati",
@@ -446,11 +446,11 @@ DOLPHIN_LANGUAGE_LIST = [
     "泰米尔语-印度", "泰米尔语-马来西亚", "泰卢固语", "古吉拉特语",
     "奥里亚语", "尼泊尔语", "僧伽罗语", "旁遮普语",
     "克什米尔语", "马拉地语",
-
+    "====================================================================== West Asian",
     # West Asian languages
     "Urdu", "Urdu-India", "Persian", "Pushto",
     "乌尔都语", "乌尔都语-印度", "波斯语", "普什图语",
-
+    "====================================================================== Arabic varieties",
     # Arabic varieties
     "Arabic", "Arabic-Morocco", "Arabic-Saudi Arabia", "Arabic-Egypt",
     "Arabic-Kuwait", "Arabic-Libya", "Arabic-Jordan", "Arabic-U.A.E.",
@@ -458,13 +458,13 @@ DOLPHIN_LANGUAGE_LIST = [
     "阿拉伯语", "阿拉伯语-摩洛哥", "阿拉伯语-沙特", "阿拉伯语-埃及",
     "阿拉伯语-科威特", "阿拉伯语-利比亚", "阿拉伯语-约旦", "阿拉伯语-阿联酋",
     "阿拉伯语-黎凡特",
-
+    "====================================================================== Central Asian and Turkic",
     # Central Asian and Turkic languages
     "Uighur", "Uzbek", "Kazakh", "Mongolian",
     "Kabyle", "Bashkir", "Tajik", "Kirghiz", "Azerbaijani",
     "维吾尔语", "乌兹别克语", "哈萨克语", "蒙古语",
     "卡拜尔语", "巴什基尔语", "塔吉克语", "吉尔吉斯语", "阿塞拜疆语",
-
+    "====================================================================== Russian",
     # Other languages
     "Russian", "俄语"
 ]
@@ -3343,13 +3343,19 @@ def MAIN_PROCESS(
                     prompt_head = f'<|im_start|>system\n{system_prompt}<|im_end|>\n<|im_start|>user\n'
                     prompt_tail = '<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n'
                 elif 'Hunyuan-MT' in model_llm:
-                    LLM_STOP_TOKEN = [1, 20, 120020]
+                    LLM_STOP_TOKEN = [1, 20, 120020, 127960]
                     en_target_language, zh_target_language = get_language_hunyuan(translate_language)
-                    if (translate_language == 'Chinese') or (transcribe_language == 'Chinese'):
-                        prompt_head = f'<|hy_begin▁of▁sentence|><|hy_User|>将以下文本翻译为{zh_target_language}，仅输出翻译后的结果，不要额外解释：\n\n'
+                    is_7B = '7B' in model_llm
+                    if is_7B:
+                        prompt_head = '<|startoftext|>'
+                        prompt_tail = '<|extra_0|>'
                     else:
-                        prompt_head = f'<|hy_begin▁of▁sentence|><|hy_User|>Translate the following segment into {en_target_language}, without additional explanation.\n\n'
-                    prompt_tail = '<｜hy_place▁holder▁no▁8｜>'
+                        prompt_head = '<|hy_begin▁of▁sentence|><|hy_User|>'
+                        prompt_tail = '<|hy_place▁holder▁no▁8|>'
+                    if (translate_language == 'Chinese') or (transcribe_language == 'Chinese'):
+                        prompt_head = f'{prompt_head}将以下文本翻译为{zh_target_language}，仅输出翻译后的结果，不要额外解释：\n\n'
+                    else:
+                        prompt_head = f'{prompt_head}Translate the following segment into {en_target_language}, without additional explanation.\n\n'
                 elif 'Seed-X' in model_llm:
                     LLM_STOP_TOKEN = [2]
                     abbr = get_language_seedx(translate_language)
