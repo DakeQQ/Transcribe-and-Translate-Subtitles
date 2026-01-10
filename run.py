@@ -84,7 +84,8 @@ WHISPER_ASR_LIST = [
     'Thai-Whisper-v3',
     'Turkish-Whisper-v3',
     'Urdu-Whisper-v3',
-    'Vietnamese-Whisper-v3'
+    'Vietnamese-Whisper-v3',
+    'Vietnamese-EraX-WoW-Turbo-V1.1-Whisper-v3',
 ]
 
 for i in WHISPER_ASR_LIST:
