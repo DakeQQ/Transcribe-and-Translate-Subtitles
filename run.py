@@ -1496,7 +1496,7 @@ def MAIN_PROCESS(
         return _start_indices * _inv_audio_len, saved_text + ';', (_start, _end)
 
     def inference_CD_dolphin(_max_asr_segment, _start, _end, _inv_audio_len, _audio, _sample_rate, _init_input_ids,
-                             _init_history_len, _init_ids_len_1, _init_ids_len_2, _init_ids_0,
+                             _init_history_len, _init_ids_len, _init_ids_len_1, _init_ids_len_2, _init_ids_0,
                              _init_ids_len_5, _init_ids_7, _init_ids_145, _init_ids_324, _init_ids_39999,
                              _init_ids_vocab_size, _init_attention_mask_D_0, _init_attention_mask_D_1,
                              _init_past_keys_D, _init_past_values_D, _init_save_id_beam, _init_repeat_penality,
